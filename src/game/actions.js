@@ -71,13 +71,15 @@ export async function vote(author, cid, day){
   } catch (err){ toast(writeError(err), true); }
 }
 
-/* post today's entry for the current constellation (replacing an earlier one); throws on a failed write */
-export async function postEntry(name, story){
+/* post today's entry for the current constellation (replacing an earlier one); throws on a failed write.
+   nick: my nickname, where the backend asks for one */
+export async function postEntry(name, story, nick){
   const day = today(), cid = S.cid, lines = draft().lines.map(l => [...l]);
   const again = !!(S.mine && S.mine.entries[day + "_" + cid]);
   await writeMine(m => {
     const k = day + "_" + cid, prev = m.entries[k];
     m.entries[k] = { c: cid, d: day, name, story, lines, t: prev && prev.t || Date.now() };
+    if (nick) m.nick = nick;
     recordPost(m.stats, { day, cid, story, lines, orig: BYID[cid].orig, topicCid: topicOf(day).cid, hour: kstHour() });
     stamp(m.stats, day);
   });

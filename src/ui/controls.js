@@ -1,6 +1,6 @@
 /* Buttons, the entry form and keyboard shortcuts. */
 import { S, draft, canAct, whyNot } from "../game/state.js";
-import { NAME_MAX, STORY_MAX } from "../game/rules.js";
+import { NAME_MAX, STORY_MAX, NICK_MAX } from "../game/rules.js";
 import { writeError } from "../game/store.js";
 import { selectConst, stepConst, undoLine, clearLines, closeEntry, stepEntry, vote, postEntry, removeEntry, saveEntryImage } from "../game/actions.js";
 import { requestDraw } from "../sky/motion.js";
@@ -39,9 +39,11 @@ export function bindControls(){
     const d = draft(), name = d.name.trim().slice(0, NAME_MAX), story = d.story.trim().slice(0, STORY_MAX);
     if (d.lines.length < 2){ toast("선을 두 개 이상 이어 주세요.", true); return; }
     if (!name){ toast("이름을 지어 주세요.", true); $("#nameInput").focus(); return; }
+    const nick = S.backend && S.backend.needsNick ? $("#nickInput").value.trim().slice(0, NICK_MAX) : "";
+    if (S.backend && S.backend.needsNick && !nick){ toast("다른 사람에게 보일 닉네임을 적어 주세요.", true); $("#nickInput").focus(); return; }
     S.posting = true; renderSheet();
     try {
-      const again = await postEntry(name, story);
+      const again = await postEntry(name, story, nick);
       S.posting = false; closeSheet();
       toast(again ? "고친 작품으로 바꿨어요" : "하늘에 올렸어요!");
     } catch (err){ S.posting = false; toast(writeError(err), true); renderSheet(); }

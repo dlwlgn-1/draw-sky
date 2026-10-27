@@ -177,6 +177,10 @@ button:disabled{cursor:default}
 .story-in:focus{outline:none;border-color:var(--line)}
 .counts{display:flex;justify-content:flex-end;gap:10px;font-size:.72rem;color:var(--dim);margin-top:-4px}
 .form .primary{width:100%;padding:15px}
+.nick{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border-radius:12px;padding:8px 12px}
+.nick label{font-size:.8rem;color:var(--sub);white-space:nowrap}
+.nick input{flex:1;min-width:0;background:transparent;border:0;padding:4px 0;font-size:.95rem}
+.nick input:focus{outline:none}
 
 .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 132px);transform:translateX(-50%);z-index:30;background:var(--text);color:var(--night);font-size:.86rem;border-radius:12px;padding:10px 16px;max-width:min(420px,calc(100% - 32px));box-sizing:border-box;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.35);pointer-events:none}
 .toast.err{background:var(--danger)}

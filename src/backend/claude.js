@@ -1,6 +1,6 @@
 /* The claude.ai artifact runtime (window.claude): shared database, who is playing, and saving files.
-   The game reaches its backend only through the object returned here, so hosting it elsewhere means
-   writing one more file with the same shape (for example on Firebase) and choosing it in game/store.js.
+   The game reaches its backend only through the object returned here; backend/firebase.js has the same shape.
+   vite.config.js picks one of the two as the "#backend" module.
 
    Backend shape:
      myId, canWrite              who is playing; canWrite null = unknown, let a refused write decide
@@ -10,9 +10,10 @@
      savePlayer(id, doc)         replace my own document
      names(ids)                  { id: display name or "" }
      saveFile(filename, blob)    offer a file to the player, or null when this view cannot
+     needsNick                   true when the backend has no names, so players choose a nickname
      setPresence(state)          share a small object about me with everyone here now (no-op without a room)
      watchPeers(onPeers)         onPeers([{ kind, isMe, by, peer, presence }, …]) when the room changes, or null */
-export async function openClaudeBackend(){
+export async function openBackend(){
   const c = window.claude;
   if (!c || typeof c.use !== "function") return null;
   /* each part may be missing in a given view; one missing part must not switch off the others */

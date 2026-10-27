@@ -4,6 +4,7 @@
      entries: { "<day>_<constellation>": { c, d, name, story, lines: [[a, b], …], t } }
      votes:   { "<day>": { "<constellation>": "<author id>" } }
      stats:   the lasting record behind badges (see badges.js); never pruned
+     nick:    my nickname, where the backend has no account names (Firebase)
      hall:    { "<day>_<constellation>": { c, d, name, story, lines, votes, t } } — my days in first place
               (see hall.js); never pruned
    Everything read from the store is someone else's input, so it is cleaned before use. */
@@ -14,6 +15,7 @@ import { cleanStats } from "./badges.js";
 export const MAX_LINES = 80;
 export const NAME_MAX = 20;
 export const STORY_MAX = 140;
+export const NICK_MAX = 12;
 export const KEEP_DAYS = 7;
 
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -43,7 +45,7 @@ function cleanEntry(k, e){
 }
 
 export function cleanPlayer(d){
-  const out = { entries: {}, votes: {}, stats: cleanStats(d && d.stats, CIDS), hall: {} };
+  const out = { entries: {}, votes: {}, stats: cleanStats(d && d.stats, CIDS), hall: {}, nick: str(d && d.nick, NICK_MAX) };
   const E = d && typeof d.entries === "object" && d.entries || {};
   for (const k of Object.keys(E)){ const e = cleanEntry(k, E[k]); if (e) out.entries[k] = e; }
   const H = d && typeof d.hall === "object" && d.hall || {};

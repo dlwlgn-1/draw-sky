@@ -4,12 +4,12 @@ import { cleanPlayer, prune } from "./rules.js";
 import { emptyStats } from "./badges.js";
 import { checkProgress } from "./progress.js";
 import { peersBySky, sharePresence } from "./presence.js";
-import { openClaudeBackend } from "../backend/claude.js";
+import { openBackend } from "#backend";   // backend/claude.js or backend/firebase.js, chosen in vite.config.js
 import { renderUI } from "../ui/panels.js";
 import { toast } from "../ui/dom.js";
 
 export async function connect(){
-  const be = await openClaudeBackend().catch(() => null);
+  const be = await openBackend().catch(err => { console.warn("backend unavailable", err); return null; });
   S.backend = be; S.dbChecked = true;
   if (be && be.watchPeers){
     be.watchPeers(list => { S.peers = peersBySky(list); renderUI(); });
@@ -58,6 +58,6 @@ export function writeError(err){
 export async function names(ids){
   const ps = S.backend && ids.length ? await S.backend.names(ids) : {};
   const out = {};
-  for (const id of ids) out[id] = id === S.myId ? "나" : ps[id] || "익명의 관측자";
+  for (const id of ids){ const p = S.players.get(id); out[id] = id === S.myId ? "나" : ps[id] || (p && p.nick) || "익명의 관측자"; }
   return out;
 }

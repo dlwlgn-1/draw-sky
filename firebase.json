@@ -1,0 +1,13 @@
+{
+  "firestore": { "rules": "firestore.rules" },
+  "hosting": {
+    "public": "dist-web",
+    "ignore": ["firebase.json", "**/.*"],
+    "headers": [{ "source": "sky.json", "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }] }]
+  },
+  "emulators": {
+    "auth": { "port": 9099 },
+    "firestore": { "port": 8080 },
+    "ui": { "enabled": false }
+  }
+}

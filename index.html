@@ -90,6 +90,10 @@
         <label class="sr" for="storyInput">이야기</label>
         <textarea class="story-in" id="storyInput" maxlength="140" rows="3" placeholder="왜 이렇게 보였는지 한두 줄 남겨 주세요"></textarea>
         <div class="counts num"><span id="nameLen">이름 0/20</span><span id="storyLen">이야기 0/140</span></div>
+        <div class="nick" id="nickField" hidden>
+          <label for="nickInput">닉네임</label>
+          <input id="nickInput" maxlength="12" placeholder="다른 사람에게 보일 이름" autocomplete="nickname">
+        </div>
         <button type="submit" class="primary" id="submitBtn">오늘 하늘에 올리기</button>
       </form>
     </div>
