@@ -95,3 +95,10 @@ test("observe keeps a copy of a won entry in the hall", () => {
   assert.deepEqual(hall["2026-10-26_ori"], { ...entry, votes: 1 });
   assert.deepEqual(cleanPlayer({ hall }).hall, hall);
 });
+
+test("a special night counts only on its own sky", () => {
+  const night = BADGES.find(b => b.id === "night");
+  const base = { day: "2026-11-17", story: "", lines: [[0, 1], [1, 2]], orig: [], topicCid: "leo", hour: 21, event: true };
+  const off = emptyStats(); recordPost(off, { ...base, cid: "ori" }); assert.equal(night.test(off), false);
+  const on = emptyStats(); recordPost(on, { ...base, cid: "leo" }); assert.equal(night.test(on), true);
+});

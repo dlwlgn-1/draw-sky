@@ -2,7 +2,7 @@
 
    Entries and votes are pruned after a week, so progress lives in a separate record that is never pruned:
      stats: { posts, topicPosts, stories, given, drawn: { cid: n }, streak, best, lastDay,
-              maxStars, wins: { "<day>_<cid>": 1 }, marks: { big, classic, owl }, badges: { id: "<day earned>" },
+              maxStars, wins: { "<day>_<cid>": 1 }, marks: { big, classic, owl, night }, badges: { id: "<day earned>" },
               seen: { day, posted: { cid: 1 }, voted: { cid: 1 } } }   ← what today already counted, so removing and
                                                                            redoing a post or a vote never counts twice
    Each player writes only their own record, so badges are a personal log rather than a contest result. */
@@ -30,6 +30,7 @@ export const BADGES = [
   { id: "story",    name: "이야기꾼",       how: "이야기를 붙인 작품 5개 올리기",       test: s => s.stories >= 5 },
   { id: "big",      name: "큰 그림",        how: "선 20개 이상으로 그리기",             test: s => !!s.marks.big },
   { id: "owl",      name: "올빼미",         how: "새벽 0시~4시에 작품 올리기",          test: s => !!s.marks.owl },
+  { id: "night",    name: "특별한 밤",      how: "유성우·기념일 특집 날 그 하늘에 올리기", test: s => !!s.marks.night },
   { id: "classic",  name: "옛사람의 눈",    how: "원래 별자리 선과 똑같이 긋기",        test: s => !!s.marks.classic, secret: true }
 ];
 const IDS = new Set(BADGES.map(b => b.id));
@@ -47,7 +48,7 @@ export function cleanStats(v, cids){
   if (typeof v.lastDay === "string" && DAY_RE.test(v.lastDay)) s.lastDay = v.lastDay;
   if (v.drawn && typeof v.drawn === "object") for (const c of Object.keys(v.drawn)) if (cids.has(c)) s.drawn[c] = count(v.drawn[c]) || 1;
   if (v.wins && typeof v.wins === "object") for (const k of Object.keys(v.wins).slice(0, 2000)) if (WIN_RE.test(k)) s.wins[k] = 1;
-  if (v.marks && typeof v.marks === "object") for (const k of ["big", "classic", "owl"]) if (v.marks[k]) s.marks[k] = 1;
+  if (v.marks && typeof v.marks === "object") for (const k of ["big", "classic", "owl", "night"]) if (v.marks[k]) s.marks[k] = 1;
   if (v.badges && typeof v.badges === "object") for (const k of Object.keys(v.badges)) if (IDS.has(k) && typeof v.badges[k] === "string" && DAY_RE.test(v.badges[k])) s.badges[k] = v.badges[k];
   const sn = v.seen;
   if (sn && typeof sn === "object" && typeof sn.day === "string" && DAY_RE.test(sn.day)){
@@ -62,7 +63,8 @@ const sameLines = (a, b) => a.length === b.length && a.every(([p, q]) => b.some(
 
 const seenOn = (s, day) => s.seen.day === day ? s.seen : (s.seen = emptySeen(day));
 
-/* a post or a re-post: p = { day, cid, story, lines, orig, topicCid, hour } where hour is the KST hour.
+/* a post or a re-post: p = { day, cid, story, lines, orig, topicCid, hour, event } where hour is the KST hour
+   and event is true on a special night (game/topic.js).
    Counters move only for the first post of a constellation on a day. */
 export function recordPost(s, p){
   const seen = seenOn(s, p.day);
@@ -78,6 +80,7 @@ export function recordPost(s, p){
     }
   }
   if (p.lines.length >= 20) s.marks.big = 1;
+  if (p.event && p.cid === p.topicCid) s.marks.night = 1;
   if (p.orig && sameLines(p.lines, p.orig)) s.marks.classic = 1;
   if (p.hour < 4) s.marks.owl = 1;
 }

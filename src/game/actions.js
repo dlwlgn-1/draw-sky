@@ -82,7 +82,8 @@ export async function postEntry(name, story, nick){
     const k = day + "_" + cid, prev = m.entries[k];
     m.entries[k] = { c: cid, d: day, name, story, lines, t: prev && prev.t || Date.now() };
     if (nick) m.nick = nick;
-    recordPost(m.stats, { day, cid, story, lines, orig: BYID[cid].orig, topicCid: topicOf(day).cid, hour: kstHour() });
+    const tp = topicOf(day);
+    recordPost(m.stats, { day, cid, story, lines, orig: BYID[cid].orig, topicCid: tp.cid, hour: kstHour(), event: !!tp.event });
     stamp(m.stats, day);
   });
   showEntry(day, S.myId);
@@ -98,7 +99,8 @@ export async function saveEntryImage(){
     const tp = topicOf(v.d), nm = await names([v.author]);
     const author = v.author === S.myId ? "내 작품" : nm[v.author];
     const site = S.backend.siteUrl ? new URL(S.backend.siteUrl).host : "";
-    const blob = await entryCard(v, BYID[v.c], author, tp.cid === v.c ? tp.theme : "", site);
+    const line = tp.cid !== v.c ? "" : tp.event ? `${tp.event.title} · ${tp.theme}` : `오늘의 주제 ${tp.theme}`;
+    const blob = await entryCard(v, BYID[v.c], author, line, site);
     const safe = v.name.replace(/[\\/:*?"<>|]/g, "").trim() || "별자리";
     await S.backend.saveFile(`${safe}.png`, blob);
     toast("이미지로 저장했어요");

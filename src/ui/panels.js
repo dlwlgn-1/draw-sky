@@ -22,7 +22,8 @@ export function renderTop(){
   $("#badgeCount").textContent = `${earnedCount()}/${BADGES.length}`;
   const tp = topicOf(today()), here = tp.cid === S.cid, btn = $("#topicBtn");
   $("#topicText").textContent = here ? tp.theme : `${BYID[tp.cid].title} · ${tp.theme}`;
-  btn.classList.toggle("away", !here);
+  btn.classList.toggle("away", !here); btn.classList.toggle("event", !!tp.event);
+  btn.querySelector(".tl").textContent = tp.event ? tp.event.title : "오늘의 주제";
   btn.setAttribute("aria-label", here ? `오늘의 주제 ${tp.theme}, 예시 보기` : `오늘의 주제 ${tp.theme}, ${BYID[tp.cid].title}로 이동`);
 }
 let vSeq = 0;
@@ -174,7 +175,7 @@ export async function renderSheet(){
     if (k.region && k.id !== tp.cid && !sect){ sect = true; ul.append(el("li", "sect", "이름 없는 하늘 · 옛사람들이 그림을 남기지 않은 구역")); }
     const li = el("li", "prow"); li.tabIndex = 0; li.setAttribute("role", "button");
     const cv = el("canvas"), meta = el("div", "meta"), top = list[0];
-    const nmEl = el("span", "nm", `${k.title}`); if (k.id === tp.cid) nmEl.append(el("span", "tag", "오늘의 주제"));
+    const nmEl = el("span", "nm", `${k.title}`); if (k.id === tp.cid) nmEl.append(el("span", "tag", tp.event ? tp.event.title : "오늘의 주제"));
     meta.append(nmEl);
     const by = el("span", "by");
     if (top) by.append(el("i", null, `★${top.votes}`), document.createTextNode(` 1위 ‘${top.name}’ · ${nm[top.author]} · ${list.length}작품`));
@@ -209,7 +210,7 @@ function hallRow(e, nm){
 /* today's theme in a sheet, or hidden when the sheet is about another constellation */
 function topicCard(box, tp, note){
   box.hidden = !tp; box.textContent = "";
-  if (tp) box.append(el("b", null, `오늘의 주제 · ${tp.theme}`), document.createTextNode(note));
+  if (tp) box.append(el("b", null, tp.event ? `${tp.event.title} 특집 · ${tp.theme}` : `오늘의 주제 · ${tp.theme}`), document.createTextNode(tp.event ? `${tp.event.note}. ${note}` : note));
 }
 export function renderUI(){ renderTop(); renderBottom(); if (S.sheet) renderSheet(); requestDraw(); announceBadges(); }
 

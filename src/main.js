@@ -2,7 +2,7 @@
 import { DATA, BYID } from "./data/constellations.js";
 import { S } from "./game/state.js";
 import { cleanLines, str, NAME_MAX, STORY_MAX } from "./game/rules.js";
-import { topicOf } from "./game/topic.js";
+import { topicOf, nextEvent } from "./game/topic.js";
 import { today } from "./game/time.js";
 import { parseLink } from "./game/share.js";
 import { connect } from "./game/store.js";
@@ -36,7 +36,7 @@ function start(data){
   if (data.ghost) S.ghost = true;
   S.spin = load("rs-spin") !== false; renderSpin();
 
-  bindControls(); bindSkyInput(); bindIntro({ theme: tp.theme, place: BYID[tp.cid].title });
+  bindControls(); bindSkyInput(); bindIntro({ theme: tp.theme, place: BYID[tp.cid].title, event: tp.event, next: nextEvent(today()) });
   startClock();
   renderTop(); renderBottom();
   S.cam = fit(S.cid); draw();

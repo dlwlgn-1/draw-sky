@@ -39,6 +39,7 @@ button:disabled{cursor:default}
 .intro .lead{font-size:.95rem;color:var(--sub)}
 .intro .today{font-size:.88rem;color:var(--sub);margin-top:14px}
 .intro .today b{font-family:var(--name);font-weight:700;color:var(--chalk)}
+.intro .ev-note{display:block;margin-top:6px;font-size:.8rem;color:var(--dim)}
 .intro .hint-up{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 40px);text-align:center;font-size:.86rem;color:var(--sub);pointer-events:none}
 .intro .sr:focus{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 80px);transform:translateX(-50%);width:auto;height:auto;clip:auto;background:var(--chalk);color:var(--night);border-radius:999px;padding:8px 16px}
 .intro:not([hidden]):not(.gone) ~ .top,.intro:not([hidden]):not(.gone) ~ .bottom{opacity:0}
@@ -55,6 +56,8 @@ button:disabled{cursor:default}
 .spin{pointer-events:auto;font-size:.76rem;color:var(--sub);background:rgba(255,255,255,.07);border-radius:999px;padding:4px 11px;white-space:nowrap}
 .spin[aria-pressed="true"]{color:var(--chalk);box-shadow:inset 0 0 0 1px rgba(247,239,198,.35)}
 .clock b{color:var(--text);display:inline-block;min-width:4.4em;text-align:right}
+.clock.soon{color:var(--chalk);background:rgba(255,206,84,.14)}
+.clock.soon b{color:var(--sticker)}
 .title{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:6px;margin-top:8px}
 .arrow{pointer-events:auto;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--text);background:rgba(255,255,255,.07)}
 .arrow svg{width:20px;height:20px}
@@ -72,6 +75,8 @@ button:disabled{cursor:default}
 .topic .tt{font-family:var(--name);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .topic.away{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
 .topic.away .tt::after{content:" ›";font-family:var(--ui);font-weight:400;color:var(--sub)}
+.topic.event{background:rgba(255,206,84,.13);border-color:rgba(255,206,84,.45)}
+.topic.event .tl{color:var(--sticker)}
 .topic-card{background:rgba(247,239,198,.07);border:1px solid rgba(247,239,198,.18);border-radius:14px;padding:10px 12px;font-size:.84rem;color:var(--sub);margin-bottom:10px}
 .topic-card b{display:block;font-family:var(--name);font-weight:700;font-size:1.05rem;color:var(--chalk)}
 .prow .tag{font-family:var(--ui);font-weight:400;font-size:.7rem;color:var(--night);background:var(--chalk);border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:2px}

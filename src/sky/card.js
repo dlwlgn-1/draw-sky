@@ -18,9 +18,10 @@ function wrap(x, text, maxW, maxLines){
   return out;
 }
 
-/* entry: { name, story, lines, d }; c: its constellation; author: display name; theme: today's theme or "";
+/* entry: { name, story, lines, d }; c: its constellation; author: display name;
+   topic: the day's topic line when the entry was on the topic sky ("오늘의 주제 …", or a special night), else "";
    site: the address to print at the foot ("" for none), so a picture shared on its own still leads back */
-export async function entryCard(entry, c, author, theme, site = ""){
+export async function entryCard(entry, c, author, topic, site = ""){
   try { await Promise.all([document.fonts.load(`700 72px ${NAME_FONT}`), document.fonts.load(`32px ${UI_FONT}`)]); } catch {}
   const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
   const x = cv.getContext("2d");
@@ -54,7 +55,7 @@ export async function entryCard(entry, c, author, theme, site = ""){
   x.fillStyle = COL.sub; x.font = `30px ${UI_FONT}`; x.textAlign = "left"; x.fillText("다시 그린 하늘", L, 104);
   x.textAlign = "right"; x.fillText(entry.d.replace(/-/g, "."), W - L, 104);
   x.textAlign = "left";
-  x.fillStyle = COL.chalk; x.font = `30px ${UI_FONT}`; x.fillText(theme ? `${c.title} · 오늘의 주제 ${theme}` : `${c.title} 위에 새로 그었어요`, L, H - 380);
+  x.fillStyle = COL.chalk; x.font = `30px ${UI_FONT}`; x.fillText(topic ? `${c.title} · ${topic}` : `${c.title} 위에 새로 그었어요`, L, H - 380);
   x.fillStyle = COL.text; x.font = `700 76px ${NAME_FONT}`;
   wrap(x, entry.name, W - 2 * L, 1).forEach((t, i) => x.fillText(t, L, H - 285 + i * 84));
   x.fillStyle = COL.sub; x.font = `32px ${UI_FONT}`; x.fillText(author, L, H - 225);

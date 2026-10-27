@@ -8,6 +8,7 @@ function tick(){
   const left = Math.max(0, untilMidnight());
   const h = Math.floor(left / 36e5), m = Math.floor(left / 6e4) % 60, s = Math.floor(left / 1e3) % 60;
   $("#countdown").textContent = [h, m, s].map(n => String(n).padStart(2, "0")).join(":");
+  $(".clock").classList.toggle("soon", left < 36e5);   // the last hour stands out
   if (today() !== S.day){ S.day = today(); S.viewing = null; renderUI(); }
 }
 

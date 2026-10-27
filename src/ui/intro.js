@@ -1,5 +1,6 @@
 /* The black entrance screen: push the small star up; it grows and brightens until the sky opens. */
 import { $, el, COL } from "./dom.js";
+import { shortDay } from "../game/time.js";
 
 const I = { on: false, p: 0, drag: null, doneT: 0, resolve: null };
 const icv = $("#introSky"), ictx = icv.getContext("2d");
@@ -63,10 +64,17 @@ export function runIntro(){
   requestAnimationFrame(drawIntro);
   return new Promise(r => { I.resolve = r; });
 }
-/* topic: today's { theme, place } shown under the title */
+/* topic: today's { theme, place, event, next } shown under the title; event: today's special night or null,
+   next: a special night coming within the week (game/topic.js nextEvent) or null */
 export function bindIntro(topic){
   const t = $("#introTopic"); t.textContent = "";
-  t.append(document.createTextNode("오늘의 주제 "), el("b", null, topic.theme), document.createTextNode(` · ${topic.place}`));
+  if (topic.event){
+    const where = topic.event.title.includes(topic.place) ? "" : ` · ${topic.place}`;
+    t.append(document.createTextNode("오늘은 "), el("b", null, `${topic.event.title} 특집`), document.createTextNode(where), el("span", "ev-note", topic.event.note));
+  } else {
+    t.append(document.createTextNode("오늘의 주제 "), el("b", null, topic.theme), document.createTextNode(` · ${topic.place}`));
+    if (topic.next) t.append(el("span", "ev-note", `${shortDay(topic.next.day)}은 ${topic.next.title} 특집이에요 · D-${topic.next.inDays}`));
+  }
   const ipt = ev => { const r = icv.getBoundingClientRect(); return { x: ev.clientX - r.left, y: ev.clientY - r.top }; };
   icv.addEventListener("pointerdown", ev => {
     if (I.doneT) return;

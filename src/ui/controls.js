@@ -6,7 +6,7 @@ import { selectConst, stepConst, undoLine, clearLines, closeEntry, stepEntry, vo
 import { requestDraw } from "../sky/motion.js";
 import { renderBottom, renderSheet, openSheet, closeSheet, renderSpin, updateLens } from "./panels.js";
 import { $, toast, store } from "./dom.js";
-import { topicOf } from "../game/topic.js";
+import { topicOf, nextEvent } from "../game/topic.js";
 import { today, yesterday } from "../game/time.js";
 
 export function bindControls(){
@@ -22,7 +22,8 @@ export function bindControls(){
   $("#topicBtn").addEventListener("click", () => {
     const tp = topicOf(today());
     if (tp.cid !== S.cid) selectConst(tp.cid);
-    else toast(`오늘의 주제 ‘${tp.theme}’ · 예: ${tp.example}`);
+    else if (tp.event) toast(`${tp.event.title} · ${tp.event.note}`);
+    else { const nx = nextEvent(today()); toast(`오늘의 주제 ‘${tp.theme}’ · 예: ${tp.example}${nx ? ` · ${nx.inDays}일 뒤 ${nx.title} 특집` : ""}`); }
   });
   $("#rankBtn").addEventListener("click", () => openSheet("rank"));
   $("#openForm").addEventListener("click", () => openSheet("form"));
