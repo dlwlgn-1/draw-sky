@@ -1,0 +1,453 @@
+<title>다시 그린 하늘 홍보 키트</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: one reading column of numbered steps (accounts → posts → schedule → outreach), each post a sky-card with its caption beside it. */
+:root{
+  --night:#0b1022; --deep:#070a17; --panel:#121a33; --line:#25305a;
+  --text:#ece8dc; --sub:#a9a69c; --dim:#77756f; --chalk:#f7efc6; --star:#ffcf3f;
+  --display:'Gowun Batang', 'Noto Serif KR', 'Apple SD Gothic Neo', serif;
+  --body:'Gowun Dodum', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--deep);color:var(--text);font-family:var(--body);font-size:15px;line-height:1.7;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:0 64px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top, 0px);z-index:10;background:var(--deep)}
+.wrap{max-width:860px;margin:0 auto}
+a{color:var(--chalk)}
+h1,h2,h3{font-family:var(--display);font-weight:700;text-wrap:balance;margin:0;line-height:1.3}
+header.hero{padding-block:44px 22px;display:grid;gap:10px}
+header.hero .eyebrow{color:var(--star);font-size:13px;letter-spacing:.14em}
+header.hero h1{font-size:clamp(30px, 7vw, 44px);letter-spacing:-.01em}
+header.hero p{margin:0;color:var(--sub);max-width:62ch}
+.cant{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:14px 16px;display:grid;gap:6px;font-size:14px;color:var(--sub)}
+.cant b{color:var(--text)}
+nav.toc{position:sticky;top:env(safe-area-inset-top, 0px);z-index:5;background:var(--deep);padding-block:10px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line)}
+nav.toc a{flex:none;text-decoration:none;color:var(--sub);font-size:13px;border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--chalk);border-color:var(--chalk);outline:none}
+section{padding-block:34px 4px;display:grid;gap:16px;scroll-margin-top:60px}
+section > h2{font-size:24px;display:flex;align-items:baseline;gap:10px}
+section > h2 .n{font-family:var(--body);font-size:13px;color:var(--star);letter-spacing:.1em}
+section > p.lead{margin:0;color:var(--sub);max-width:66ch}
+h3{font-size:18px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:14px}
+.block{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:10px;min-width:0}
+.block h3 small{font-family:var(--body);font-weight:400;font-size:12px;color:var(--dim);margin-left:6px}
+.copy{position:relative;min-width:0}
+.copy pre{margin:0;white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;font-family:var(--body);font-size:14px;line-height:1.7;background:var(--night);border:1px solid var(--line);border-radius:10px;padding:12px 14px 12px}
+.copy button{margin-top:8px}
+button{font:inherit;cursor:pointer}
+.btn{background:transparent;color:var(--chalk);border:1px solid var(--chalk);border-radius:999px;padding:5px 14px;font-size:13px}
+.btn:hover,.btn:focus-visible{background:var(--chalk);color:var(--night);outline:none}
+.btn.done{background:var(--star);border-color:var(--star);color:var(--night)}
+.post{display:grid;grid-template-columns:minmax(0, 300px) minmax(0, 1fr);gap:16px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
+.post .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--sub)}
+.chip{border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--sub)}
+.chip.when{border-color:var(--star);color:var(--star)}
+.media{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:10px}
+.media img,.media video{flex:none;width:100%;max-width:100%;scroll-snap-align:start;border-radius:10px;background:var(--night);display:block}
+.media.multi img{width:86%}
+.dl{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13px}
+.dl a{color:var(--sub)}
+.side{display:grid;gap:10px;align-content:start;min-width:0}
+.tip{font-size:13px;color:var(--dim);margin:0}
+table{border-collapse:collapse;width:100%;font-size:14px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line)}
+th{font-family:var(--display);color:var(--chalk);font-weight:700;white-space:nowrap;background:var(--panel)}
+tr:last-child td{border-bottom:0}
+td.d{white-space:nowrap;color:var(--star);font-variant-numeric:tabular-nums}
+ol.steps{margin:0;padding-left:20px;display:grid;gap:6px}
+.profile{display:flex;gap:14px;align-items:center}
+.profile img{width:96px;height:96px;border-radius:50%;flex:none}
+.warn{border-left:3px solid var(--star);padding:2px 0 2px 12px;color:var(--sub);font-size:14px}
+@media (max-width:640px){ .post{grid-template-columns:1fr} }
+@media (prefers-reduced-motion:reduce){ *{scroll-behavior:auto!important} }
+</style>
+
+<div class="wrap">
+<header class="hero">
+  <span class="eyebrow">REDRAWN SKY · PROMOTION KIT</span>
+  <h1>다시 그린 하늘 홍보 키트</h1>
+  <p>인스타그램·X·페이스북 계정에 넣을 프로필과 첫 게시물, 올리는 날짜, 커뮤니티 글, 과학관·천문대에 보낼 메일을 한곳에 모았어요. 글은 <b>복사</b> 버튼으로, 이미지와 영상은 <b>원본 받기</b> 링크로 가져가세요.</p>
+  <div class="cant">
+    <b>먼저 해 주셔야 하는 일</b>
+    <span>계정 만들기와 게시는 휴대폰·이메일 인증이 필요해서 직접 하셔야 해요. 아래 순서대로 하면 30분이면 끝나요.</span>
+    <span>사이트를 배포한 주소(예: <code>https://프로젝트ID.web.app</code>)가 정해지면 프로필 링크와 소개서의 <b>[사이트 주소]</b> 자리에 넣어 주세요.</span>
+  </div>
+</header>
+
+<nav class="toc" aria-label="목차">
+  <a href="#accounts">계정 만들기</a><a href="#profile">프로필</a><a href="#posts">첫 게시물</a><a href="#schedule">올리는 날짜</a>
+  <a href="#tags">해시태그</a><a href="#x-fb">X·페이스북</a><a href="#community">커뮤니티</a><a href="#orgs">기관 메일</a><a href="#contacts">연락처</a><a href="#global">해외</a>
+</nav>
+
+<section id="accounts">
+  <h2><span class="n">STEP 1</span>계정 만들기</h2>
+  <div class="grid2">
+    <div class="block"><h3>인스타그램</h3>
+      <ol class="steps">
+        <li>새 이메일로 가입하고, 사용자 이름은 아래 후보 중 비어 있는 것으로 정해요.</li>
+        <li>설정 → 계정 유형 → <b>프로페셔널 계정(크리에이터)</b>으로 바꾸면 통계를 볼 수 있어요. 카테고리는 ‘게임’ 또는 ‘교육’.</li>
+        <li>프로필 사진, 소개, 링크(사이트 주소)를 넣어요.</li>
+        <li>하이라이트 세 개를 만들어요: <b>하는 법</b> · <b>오늘의 1위</b> · <b>특집</b>.</li>
+      </ol></div>
+    <div class="block"><h3>X (트위터)</h3>
+      <ol class="steps">
+        <li>인스타와 같은 이름으로 가입해요.</li>
+        <li>프로필 사진, 소개, 웹사이트 칸에 사이트 주소.</li>
+        <li>소개 스레드(아래)를 올리고 <b>프로필에 고정</b>해요.</li>
+      </ol></div>
+    <div class="block"><h3>페이스북</h3>
+      <ol class="steps">
+        <li>개인 계정에서 <b>페이지 만들기</b> → 이름 ‘다시 그린 하늘’, 카테고리는 ‘비디오 게임’이나 ‘교육’ 쪽에서 가장 비슷한 것.</li>
+        <li>인스타 계정을 페이지에 연결하면 한 번에 두 곳에 올릴 수 있어요(설정 → 연결된 계정).</li>
+        <li>페이스북은 링크를 붙이면 미리보기 그림이 크게 떠요. 첫 글은 링크와 함께 올려요.</li>
+      </ol></div>
+  </div>
+</section>
+
+<section id="profile">
+  <h2><span class="n">STEP 2</span>프로필</h2>
+  <div class="block">
+    <div class="profile"><img src="images/profile.jpg" alt="프로필 사진: 오리온 별을 모래시계 모양으로 이은 그림">
+      <div><h3>프로필 사진</h3><p class="tip">세 곳 모두 같은 사진을 써요. 동그랗게 잘려도 그림이 가운데 남아요.</p>
+      <div class="dl"><a href="https://github.com/dlwlgn-1/draw-sky/raw/main/promo/images/profile.jpg" target="_blank" rel="noopener">원본 받기 (1080×1080)</a></div></div></div>
+  </div>
+  <div class="grid2">
+    <div class="block"><h3>이름 · 사용자 이름 후보</h3>
+      <div class="copy"><pre>이름: 다시 그린 하늘
+사용자 이름 후보: redrawn.sky / redrawnsky / dasi.sky / redrawn_sky_kr</pre><button class="btn" type="button">복사</button></div>
+      <p class="tip">후보가 비어 있는지는 가입할 때 확인해 주세요. 세 곳 모두 같은 이름이면 찾기 쉬워요.</p></div>
+    <div class="block"><h3>인스타 소개 <small>150자 이내</small></h3>
+      <div class="copy"><pre>🌌 진짜 별을 다시 이어 나만의 별자리를
+✍️ 이름과 이야기를 붙이면 모두가 별을 줘요
+🏆 매일 자정, 별자리마다 1위
+👇 휴대폰으로 바로 플레이</pre><button class="btn" type="button">복사</button></div></div>
+    <div class="block"><h3>X 소개 <small>160자 이내</small></h3>
+      <div class="copy"><pre>진짜 별을 다시 이어 나만의 별자리를 만드는 웹 게임 🌌 이름과 이야기를 붙이고 별을 모아 오늘의 1위로. 매일 자정 마감 · 유성우 특집</pre><button class="btn" type="button">복사</button></div></div>
+    <div class="block"><h3>페이스북 페이지 소개</h3>
+      <div class="copy"><pre>다시 그린 하늘은 진짜 밤하늘의 별 위에 나만의 별자리를 긋고, 이름과 이야기를 붙여 서로 별을 주는 무료 웹 게임이에요. 설치 없이 휴대폰 브라우저로 바로 할 수 있고, 매일 자정 별자리마다 1위가 정해져요.</pre><button class="btn" type="button">복사</button></div></div>
+  </div>
+</section>
+
+<section id="posts">
+  <h2><span class="n">STEP 3</span>첫 게시물 9개</h2>
+  <p class="lead">올리는 순서대로예요. 인스타 그리드는 나중에 올린 게 앞에 오니, 아홉 개를 다 올리면 소개 글은 맨 아래 오른쪽에 자리 잡아요. 예시 작품은 모두 ‘다시 그린 하늘’ 계정 이름으로 그렸고, 게임 화면 속 다른 이름과 순위는 화면 예시예요.</p>
+
+  <article class="post">
+    <div class="side"><div class="media"><img src="images/feed-01-hero.jpg" alt="소개 이미지: 오리온을 모래시계로 이은 하늘과 ‘다시 그린 하늘’ 제목"></div>
+      <div class="dl"><a href="https://github.com/dlwlgn-1/draw-sky/raw/main/promo/images/feed-01-hero.jpg" target="_blank" rel="noopener">원본 받기</a></div></div>
+    <div class="side"><div class="meta"><span class="chip when">10/28</span><span class="chip">사진 1장</span><h3>① 소개</h3></div>
+      <div class="copy"><pre>오늘 밤, 별을 다시 이어 보세요 🌌
+
+옛사람들은 별을 이어 사냥꾼과 곰과 백조를 그렸어요.
+같은 별을 지금 우리가 이으면 뭐가 보일까요?
+
+다시 그린 하늘은 진짜 밤하늘의 별 위에 나만의 별자리를 긋고,
+이름과 이야기를 붙여 서로 별을 주는 게임이에요.
+매일 자정, 별자리마다 1위가 정해져요.
+
+✦ 무료 · 설치 없음 · 휴대폰 브라우저로 바로
+✦ 프로필 링크에서 플레이
+
+#다시그린하늘 #별자리 #밤하늘 #별스타그램 #천문 #웹게임 #무료게임</pre><button class="btn" type="button">복사</button></div></div>
+  </article>
+
+  <article class="post">
+    <div class="side"><div class="media multi"><img src="images/feed-howto-1.jpg" alt="하는 법 1: 진짜 별을 이어요"><img src="images/feed-howto-2.jpg" alt="하는 법 2: 이름과 이야기를 붙여요"><img src="images/feed-howto-3.jpg" alt="하는 법 3: 마음에 드는 작품에 별을"><img src="images/feed-howto-4.jpg" alt="하는 법 4: 자정에 1위가 정해져요"></div>
+      <div class="dl"><a href="https://github.com/dlwlgn-1/draw-sky/raw/main/promo/images/feed-howto-1.jpg" target="_blank" rel="noopener">1</a><a href="https://github.com/dlwlgn-1/draw-sky/raw/main/promo/images/feed-howto-2.jpg" target="_blank" rel="noopener">2</a><a href="https://github.com/dlwlgn-1/draw-sky/raw/main/promo/images/feed-howto-3.jpg" target="_blank" rel="noopener">3</a><a href="https://github.com/dlwlgn-1/draw-sky/raw/main/promo/images/feed-howto-4.jpg" target="_blank" rel="noopener">4</a><span class="tip">원본 받기</span></div></div>
+    <div class="side"><div class="meta"><span class="chip when">10/29</span><span class="chip">캐러셀 4장</span><h3>② 하는 법</h3></div>
+      <div class="copy"><pre>다시 그린 하늘, 이렇게 해요 ✍️
+
+1. 별 두 개를 차례로 눌러 선을 이어요
+2. 새 별자리에 이름과 한두 줄 이야기를 붙여요
+3. 마음에 드는 작품에 별을 줘요 (별자리마다 하루 한 작품)
+4. 자정에 1위가 정해지고, 1위 작품은 명예의 전당에 남아요
+
+오늘의 주제는 매일 바뀌어요. 오늘은 어떤 하늘일까요? 🌙
+(화면 속 이름과 순위는 예시예요)
+
+#다시그린하늘 #별자리 #별스타그램 #밤하늘 #오늘의주제</pre><button class="btn" type="button">복사</button></div>
+      <p class="tip">이 게시물은 하이라이트 ‘하는 법’에도 스토리로 넣어 두세요.</p></div>
+  </article>
+
+  <article class="post">
+    <div class="side"><div class="media"><video src="video/reel-howto.mp4" poster="images/story-cover.jpg" controls muted playsinline preload="metadata"></video></div>
+      <div class="dl"><a href="https://github.com/dlwlgn-1/draw-sky/raw/main/promo/video/reel-howto.mp4" target="_blank" rel="noopener">영상 원본 받기 (26초, 1080×1920)</a><a href="https://github.com/dlwlgn-1/draw-sky/raw/main/promo/images/story-cover.jpg" target="_blank" rel="noopener">커버 이미지</a></div></div>
+    <div class="side"><div class="meta"><span class="chip when">10/30</span><span class="chip">릴스</span><h3>③ 릴스: 별을 밀어 올리면</h3></div>
+      <div class="copy"><pre>작은 별을 밀어 올리면 진짜 밤하늘이 열려요 🌌
+별을 잇고, 이름을 붙이고, 별을 모아 오늘의 1위로.
+하늘을 넘기면 다른 별자리로 날아가요 ✈️
+
+프로필 링크에서 바로 해 볼 수 있어요.
+
+#다시그린하늘 #별자리 #밤하늘 #릴스 #웹게임 #감성게임</pre><button class="btn" type="button">복사</button></div>
+      <p class="tip">영상에는 소리가 없어요. 올릴 때 인스타 앱에서 잔잔한 피아노나 로파이 인기 음원을 붙이면 더 많이 노출돼요. 같은 영상을 유튜브 쇼츠와 틱톡에도 올리세요.</p></div>
+  </article>
+
+  <article class="post">
+    <div class="side"><div class="media multi"><img src="images/card-ori-hunter.jpg" alt="옛사람이 그린 오리온: 사냥꾼"><img src="images/card-ori-hourglass.jpg" alt="같은 별을 다시 이은 모래시계"></div>
+      <div class="dl"><a href="https://github.com/dlwlgn-1/draw-sky/raw/main/promo/images/card-ori-hunter.jpg" target="_blank" rel="noopener">1</a><a href="https://github.com/dlwlgn-1/draw-sky/raw/main/promo/images/card-ori-hourglass.jpg" target="_blank" rel="noopener">2</a><span class="tip">원본 받기</span></div></div>
+    <div class="side"><div class="meta"><span class="chip when">11/1</span><span class="chip">캐러셀 2장</span><h3>④ 같은 별, 다른 그림</h3></div>
+      <div class="copy"><pre>같은 별, 다른 그림 ✦
+
+옛사람이 본 오리온은 몽둥이를 든 사냥꾼.
+그런데 허리띠 세 별을 가운데 두고 다시 이으면… 모래시계가 돼요 ⏳
+
+여러분 눈엔 이 별들이 뭐로 보이나요?
+댓글로 알려 주시면 다음 게시물에서 그려 볼게요 👇
+
+#다시그린하늘 #오리온자리 #별자리 #겨울별자리 #별스타그램</pre><button class="btn" type="button">복사</button></div>
+      <p class="tip">댓글로 받은 아이디어를 실제로 그려서 다음 게시물로 올리면 참여가 크게 늘어요.</p></div>
+  </article>
+
+  <article class="post">
+    <div class="side"><div class="media"><img src="images/card-uma-cat.jpg" alt="큰곰자리를 다시 이은 ‘기지개 켜는 고양이’"></div>
+      <div class="dl"><a href="https://github.com/dlwlgn-1/draw-sky/raw/main/promo/images/card-uma-cat.jpg" target="_blank" rel="noopener">원본 받기</a></div></div>
+    <div class="side"><div class="meta"><span class="chip when">11/3</span><span class="chip">사진 1장</span><h3>⑤ 북두칠성은 국자?</h3></div>
+      <div class="copy"><pre>북두칠성은 국자? 🥄
+손잡이를 꼬리로 보면… 기지개 켜는 고양이 🐈
+
+큰곰자리 위에 다시 그은 ‘기지개 켜는 고양이’
+오늘 밤 북쪽 하늘에서 직접 찾아보세요.
+
+#다시그린하늘 #북두칠성 #큰곰자리 #고양이 #별자리</pre><button class="btn" type="button">복사</button></div></div>
+  </article>
+
+  <article class="post">
+    <div class="side"><div class="media"><img src="images/card-leo-question.jpg" alt="사자자리의 낫 모양을 이은 ‘거꾸로 된 물음표’"></div>
+      <div class="dl"><a href="https://github.com/dlwlgn-1/draw-sky/raw/main/promo/images/card-leo-question.jpg" target="_blank" rel="noopener">원본 받기</a></div></div>
+    <div class="side"><div class="meta"><span class="chip when">11/5</span><span class="chip">사진 1장</span><h3>⑥ 거꾸로 된 물음표</h3></div>
+      <div class="copy"><pre>사자 갈기라던 낫 모양, 뒤집어 보면 물음표 ❓
+
+11월 17일은 사자자리 유성우가 쏟아지는 밤이에요.
+그날 다시 그린 하늘에서 사자자리 특집이 열려요 🌠
+
+#다시그린하늘 #사자자리 #사자자리유성우 #별자리 #유성우</pre><button class="btn" type="button">복사</button></div></div>
+  </article>
+
+  <article class="post">
+    <div class="side"><div class="media"><img src="images/card-cyg-plane.jpg" alt="백조자리를 다시 이은 ‘종이비행기’"></div>
+      <div class="dl"><a href="https://github.com/dlwlgn-1/draw-sky/raw/main/promo/images/card-cyg-plane.jpg" target="_blank" rel="noopener">원본 받기</a></div></div>
+    <div class="side"><div class="meta"><span class="chip when">11/7</span><span class="chip">사진 1장</span><h3>⑦ 종이비행기</h3></div>
+      <div class="copy"><pre>은하수 위로 날린 종이비행기 ✈️
+백조자리의 큰 십자가를 비행기로 접어 봤어요.
+꼬리에서 반짝이는 별은 데네브, 여름밤의 대삼각형 중 하나예요.
+
+#다시그린하늘 #백조자리 #은하수 #종이비행기 #별자리</pre><button class="btn" type="button">복사</button></div></div>
+  </article>
+
+  <article class="post">
+    <div class="side"><div class="media multi"><img src="images/feed-event-pepero.jpg" alt="11·11 빼빼로데이 특집 예고"><img src="images/card-gem-pepero.jpg" alt="쌍둥이자리를 다시 이은 ‘나눠 먹는 빼빼로’"></div>
+      <div class="dl"><a href="https://github.com/dlwlgn-1/draw-sky/raw/main/promo/images/feed-event-pepero.jpg" target="_blank" rel="noopener">예고</a><a href="https://github.com/dlwlgn-1/draw-sky/raw/main/promo/images/card-gem-pepero.jpg" target="_blank" rel="noopener">당일 카드</a><span class="tip">원본 받기</span></div></div>
+    <div class="side"><div class="meta"><span class="chip when">11/9 · 11/11</span><span class="chip">예고 + 당일</span><h3>⑧ 빼빼로데이 특집</h3></div>
+      <div class="copy"><pre>11월 11일, 다시 그린 하늘 빼빼로데이 특집 🍫
+
+그날의 하늘은 쌍둥이자리, 주제는 ‘나눠 먹는 마음’.
+친구나 좋아하는 사람과 둘만의 별자리를 그려 보세요.
+링크를 보내 서로 별을 주면, 그날 1위는 둘 중 한 명일지도 ✨
+
+특집 날 올리면 ‘특별한 밤’ 뱃지를 받아요.
+
+#다시그린하늘 #빼빼로데이 #쌍둥이자리 #커플 #별자리</pre><button class="btn" type="button">복사</button></div>
+      <p class="tip">11/9에 예고 이미지를, 11/11 당일 아침에 당일 카드와 스토리를 올려요. 11/12에는 실제 1위 작품을 게임에서 ‘이미지 저장’해 소개하세요(닉네임을 꼭 밝혀 주세요).</p></div>
+  </article>
+
+  <article class="post">
+    <div class="side"><div class="media"><img src="images/feed-event-leonids.jpg" alt="11·17 사자자리 유성우 특집 예고"></div>
+      <div class="dl"><a href="https://github.com/dlwlgn-1/draw-sky/raw/main/promo/images/feed-event-leonids.jpg" target="_blank" rel="noopener">원본 받기</a></div></div>
+    <div class="side"><div class="meta"><span class="chip when">11/14 · 11/17</span><span class="chip">D-3 예고 + 당일</span><h3>⑨ 사자자리 유성우 특집</h3></div>
+      <div class="copy"><pre>D-3 🌠 11월 17일 사자자리 유성우 특집
+
+이맘때 밤, 사자자리 쪽에서 별똥별이 떨어져요.
+하늘을 올려다본 그날, 사자자리를 다시 그려 주세요.
+주제는 ‘별똥별이 떨어지는 밤’.
+
+유성우 보면서 그린 작품이면 더 좋아요 🌌
+#다시그린하늘 #사자자리유성우 #유성우 #별똥별 #천문현상</pre><button class="btn" type="button">복사</button></div>
+      <p class="tip">유성우 날은 뉴스와 SNS에 유성우 이야기가 많아서 해시태그 검색으로 새로 들어오는 사람이 많아요. 당일 저녁 8~9시에 스토리를 한 번 더 올리세요.</p></div>
+  </article>
+</section>
+
+<section id="schedule">
+  <h2><span class="n">STEP 4</span>올리는 날짜</h2>
+  <p class="lead">처음 3주는 이틀에 한 번 게시물, 매일 스토리 하나가 목표예요. 스토리에는 게임에서 ‘이미지 저장’한 <b>어제 1위</b> 작품을 올리면 매일 새 소재가 생겨요.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>날짜</th><th>게시물</th><th>스토리</th></tr></thead>
+    <tbody>
+      <tr><td class="d">10/28 수</td><td>① 소개</td><td>스토리 커버 + 링크 스티커</td></tr>
+      <tr><td class="d">10/29 목</td><td>② 하는 법</td><td>하는 법 → 하이라이트 저장</td></tr>
+      <tr><td class="d">10/30 금</td><td>③ 릴스 (쇼츠·틱톡 같이)</td><td>오늘의 주제</td></tr>
+      <tr><td class="d">11/1 일</td><td>④ 같은 별, 다른 그림</td><td>어제 1위</td></tr>
+      <tr><td class="d">11/3 화</td><td>⑤ 북두칠성은 국자?</td><td>어제 1위</td></tr>
+      <tr><td class="d">11/5 목</td><td>⑥ 거꾸로 된 물음표</td><td>어제 1위</td></tr>
+      <tr><td class="d">11/7 토</td><td>⑦ 종이비행기 · 댓글 아이디어 그려 보기</td><td>어제 1위</td></tr>
+      <tr><td class="d">11/9 월</td><td>⑧ 빼빼로데이 예고</td><td>D-2</td></tr>
+      <tr><td class="d">11/11 수</td><td>⑧ 당일 카드</td><td>아침·저녁 두 번, 하이라이트 ‘특집’</td></tr>
+      <tr><td class="d">11/12 목</td><td>빼빼로데이 1위 작품 소개</td><td>어제 1위</td></tr>
+      <tr><td class="d">11/14 토</td><td>⑨ 사자자리 유성우 D-3</td><td>D-3</td></tr>
+      <tr><td class="d">11/17 화</td><td>유성우 당일 안내</td><td>저녁 8~9시 한 번 더</td></tr>
+      <tr><td class="d">11/18 수</td><td>유성우 특집 1위 소개</td><td>어제 1위</td></tr>
+      <tr><td class="d">12/11 ~ 12/15</td><td>쌍둥이자리 유성우 D-3 → 당일 → 1위</td><td>같은 방식</td></tr>
+      <tr><td class="d">12/21 ~ 12/25</td><td>크리스마스이브 특집(오리온)</td><td>같은 방식</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="tags">
+  <h2><span class="n">STEP 5</span>해시태그</h2>
+  <div class="grid2">
+    <div class="block"><h3>기본 <small>매번</small></h3><div class="copy"><pre>#다시그린하늘 #별자리 #밤하늘 #별스타그램 #천문 #별보기 #웹게임 #무료게임</pre><button class="btn" type="button">복사</button></div></div>
+    <div class="block"><h3>특집 날 <small>골라서 추가</small></h3><div class="copy"><pre>#유성우 #별똥별 #사자자리유성우 #쌍둥이자리유성우 #빼빼로데이 #크리스마스 #천문현상</pre><button class="btn" type="button">복사</button></div></div>
+    <div class="block"><h3>영어 <small>해외 노출용</small></h3><div class="copy"><pre>#RedrawnSky #constellation #stargazing #astronomy #nightsky #meteorshower #webgame</pre><button class="btn" type="button">복사</button></div></div>
+  </div>
+  <p class="tip">해시태그는 5~10개가 적당해요. 너무 많으면 오히려 덜 보여요.</p>
+</section>
+
+<section id="x-fb">
+  <h2><span class="n">STEP 6</span>X · 페이스북</h2>
+  <div class="grid2">
+    <div class="block"><h3>X 소개 스레드 <small>프로필에 고정</small></h3>
+      <div class="copy"><pre>1/ 같은 별을 보고 옛사람은 사냥꾼을, 저는 모래시계를 봤어요.
+진짜 별 위에 나만의 별자리를 긋고 이름과 이야기를 붙이는 웹 게임 ‘다시 그린 하늘’을 만들었어요 🌌 (사진: 소개 이미지)
+
+2/ 별 두 개를 누르면 선이 그어지고, 이름과 이야기를 붙이면 끝. 다른 사람 작품에 별을 주고, 매일 자정 별자리마다 1위가 정해져요. (사진: 하는 법)
+
+3/ 별 위치·밝기·색은 히파르코스 위성 자료(XHIP), 은하수도 실제 윤곽이에요. 별을 누르면 이름과 등급이 나와요. (영상: 릴스)
+
+4/ 11/11 빼빼로데이, 11/17 사자자리 유성우 특집도 열려요. 휴대폰으로 바로 👉 [사이트 주소]</pre><button class="btn" type="button">복사</button></div></div>
+    <div class="block"><h3>페이스북 첫 글 <small>링크와 함께</small></h3>
+      <div class="copy"><pre>오늘 밤, 별을 다시 이어 보세요 🌌
+
+옛사람들은 별을 이어 사냥꾼과 곰과 백조를 그렸어요. 같은 별을 지금 우리가 이으면 뭐가 보일까요?
+
+‘다시 그린 하늘’은 진짜 밤하늘의 별 위에 나만의 별자리를 긋고, 이름과 이야기를 붙여 서로 별을 주는 무료 웹 게임이에요. 설치 없이 휴대폰으로 바로 할 수 있어요.
+
+[사이트 주소]</pre><button class="btn" type="button">복사</button></div>
+      <p class="tip">페이스북은 사진 없이 링크만 붙여도 미리보기 그림이 크게 떠요. 지역 천문 동호회·과학 교사 그룹에도 이 글을 공유하세요(그룹 규칙 확인).</p></div>
+  </div>
+</section>
+
+<section id="community">
+  <h2><span class="n">STEP 7</span>커뮤니티에 올릴 글</h2>
+  <p class="lead">커뮤니티마다 홍보 규칙이 달라요. 올리기 전에 공지를 꼭 읽고, 홍보 게시판이 따로 있으면 거기에 올려 주세요.</p>
+  <div class="grid2">
+    <div class="block"><h3>에브리타임 <small>자유·홍보 게시판</small></h3>
+      <div class="copy"><pre>직접 만든 별자리 게임 해 주실 분 🌌
+
+진짜 밤하늘 별 위에 나만의 별자리를 긋고 이름 붙이는 웹 게임을 만들었어요. 서로 별을 주고 매일 자정에 1위가 정해져요.
+설치·가입 없이 링크만 누르면 돼요. 시험 기간 머리 식히기용으로 3분이면 충분해요!
+
+[사이트 주소]</pre><button class="btn" type="button">복사</button></div></div>
+    <div class="block"><h3>천문 카페·갤러리 <small>별하늘지기, 천문 갤러리 등</small></h3>
+      <div class="copy"><pre>[공유] 실제 별 자료로 만든 별자리 다시 그리기 웹 게임
+
+안녕하세요. 혼자 만든 비상업·무료 웹 게임을 공유드려요.
+XHIP(히파르코스) 별 목록 8등급까지와 은하수 윤곽 자료로 하늘을 그렸고, 별을 누르면 이름·등급·적경·적위가 나와요.
+이 별들로 새 별자리를 긋고 이름과 이야기를 붙여 서로 별을 주는 방식이에요. 11/17 사자자리 유성우, 12/14 쌍둥이자리 유성우 때 특집도 열려요.
+
+자료나 표시가 틀린 곳이 있으면 알려 주시면 고칠게요. 규칙에 맞지 않으면 삭제하겠습니다.
+[사이트 주소]</pre><button class="btn" type="button">복사</button></div></div>
+    <div class="block"><h3>인디스쿨 등 교사 커뮤니티</h3>
+      <div class="copy"><pre>[자료] 별자리 단원에 쓸 수 있는 무료 웹 활동 ‘다시 그린 하늘’
+
+학생들이 휴대폰으로 실제 별을 이어 자기만의 별자리를 만들고, 이름과 이야기를 붙여 서로 별을 주는 활동이에요. 가입 없이 닉네임만 쓰고, 광고가 없어요.
+
+20분 수업 예시
+· 5분: ‘원래 선’ 버튼으로 옛 별자리와 신화 소개
+· 10분: 같은 별을 각자 다시 잇고 이름·이야기 붙이기
+· 5분: 서로 별 주고, “같은 별인데 왜 다르게 보였을까?”로 마무리
+
+소개서 PDF를 첨부했어요. [사이트 주소]</pre><button class="btn" type="button">복사</button></div>
+      <p class="tip">소개서 PDF: <a href="https://github.com/dlwlgn-1/draw-sky/raw/main/promo/brochure/brochure-ko.pdf" target="_blank" rel="noopener">원본 받기</a>. 인디스쿨처럼 교사 인증이 필요한 곳은 아는 선생님께 대신 올려 달라고 부탁하는 게 빨라요.</p></div>
+  </div>
+</section>
+
+<section id="orgs">
+  <h2><span class="n">STEP 8</span>과학관·천문대에 보낼 메일</h2>
+  <p class="lead">처음엔 크게 바라지 말고 “한 번 써 봐 주세요” 정도로 가볍게 보내는 게 답장이 잘 와요. 소개서 PDF를 꼭 첨부하세요. 같은 내용을 문의 게시판에 올려도 돼요.</p>
+  <div class="block"><h3>과학관 · 천문대 · 천체투영관</h3>
+    <div class="copy"><pre>제목: [제안] 관람객이 직접 별자리를 다시 그리는 무료 웹 활동 ‘다시 그린 하늘’
+
+안녕하세요, ○○ 담당자님.
+‘다시 그린 하늘’이라는 무료 웹 게임을 만든 ○○○입니다.
+
+관람객이 휴대폰으로 실제 밤하늘의 별(XHIP 히파르코스 목록, 8등급까지)을 이어 자기만의 별자리를 만들고, 이름과 이야기를 붙여 서로 별을 주는 활동이에요. 설치와 회원가입이 없고 광고도 없습니다. ‘원래 선’ 버튼으로 전통 별자리와 신화도 함께 보여 줄 수 있어요.
+
+이렇게 써 보실 수 있을 것 같아 연락드렸습니다.
+· 천체투영관 상영 뒤, 방금 본 별자리를 관람객이 다시 그려 보는 활동 (출구 QR 하나면 됩니다)
+· 관측회 대기 시간 활동, 끝날 때 그날 1위 함께 보기
+· 11/17 사자자리 유성우, 12/14 쌍둥이자리 유성우 관측 행사와 연계 (게임 안에서 특집이 열립니다)
+
+기관 행사에 맞춘 ‘오늘의 주제’나 특집 날을 따로 열어 드릴 수도 있습니다. 소개서를 첨부했고, 아래 주소에서 바로 해 보실 수 있어요.
+[사이트 주소]
+
+편하실 때 한 번 살펴봐 주시면 감사하겠습니다.
+○○○ 드림 · [연락받을 이메일]</pre><button class="btn" type="button">복사</button></div></div>
+  <div class="grid2">
+    <div class="block"><h3>후속 메일 <small>1~2주 답이 없을 때</small></h3>
+      <div class="copy"><pre>제목: Re: [제안] 다시 그린 하늘
+
+안녕하세요, 지난번 연락드린 ○○○입니다.
+다음 달 ○일 ○○자리 유성우 특집에 맞춰 관측 행사에서 써 보실 수 있을까 싶어 한 번 더 연락드립니다. 짧게 통화나 시연이 필요하시면 맞춰 드릴게요.
+감사합니다.</pre><button class="btn" type="button">복사</button></div></div>
+    <div class="block"><h3>보내기 전 체크</h3>
+      <ol class="steps">
+        <li>사이트가 배포되어 있고, 휴대폰에서 열리는지</li>
+        <li>[사이트 주소]·[연락받을 이메일]·○○ 자리를 다 채웠는지</li>
+        <li>소개서 PDF 첨부 (소개서 HTML을 브라우저로 열어 칸을 채우고 PDF로 저장)</li>
+        <li>한 번에 여러 곳을 받는 사람에 넣지 말고, 기관마다 따로 보내기</li>
+      </ol></div>
+  </div>
+</section>
+
+<section id="contacts">
+  <h2><span class="n">STEP 9</span>연락처</h2>
+  <p class="lead" id="contactsLead">공식 사이트에서 확인한 연락 방법만 적었어요. 담당 부서는 바뀔 수 있으니 보내기 전에 링크를 한 번 열어 확인해 주세요.</p>
+  <!--CONTACTS-->
+</section>
+
+<section id="global">
+  <h2><span class="n">STEP 10</span>해외로 퍼뜨리려면</h2>
+  <div class="warn">지금 게임 화면은 한국어뿐이에요. 해외에서 들어온 사람이 바로 나가지 않으려면 <b>영어판</b>이 먼저 있어야 해요. 영어판이 생기면 Reddit, Product Hunt, Hacker News, 국제천문연맹(IAU) 같은 곳에 이 글들을 쓰면 돼요.</div>
+  <div class="grid2">
+    <div class="block"><h3>영어 소개 <small>인스타·X 프로필</small></h3>
+      <div class="copy"><pre>🌌 Connect real stars into your own constellation
+✍️ Name it, tell its story, collect stars from others
+🏆 A winner for every sky, every midnight
+👇 Play in your phone browser, no install</pre><button class="btn" type="button">복사</button></div></div>
+    <div class="block"><h3>영어 게시물 <small>소개 이미지와 함께</small></h3>
+      <div class="copy"><pre>Same stars, a different picture ✦
+
+The ancient Greeks saw a hunter in Orion. Join the same stars around his belt and you get an hourglass ⏳
+
+Redrawn Sky is a free web game: connect real stars (from the Hipparcos-based XHIP catalog) into your own constellation, give it a name and a story, and everyone votes. Each sky crowns a winner at midnight.
+
+#RedrawnSky #constellation #stargazing #astronomy #nightsky</pre><button class="btn" type="button">복사</button></div></div>
+    <div class="block"><h3>Show HN / Product Hunt 한 줄</h3>
+      <div class="copy"><pre>Show HN: Redrawn Sky – connect real stars into your own constellations and vote daily
+
+I made a small web game on top of the XHIP star catalog (Hipparcos, down to mag 8) with the real Milky Way outline. You draw lines between real stars, name your constellation, write a one-line myth, and others star it. Rankings close at midnight per sky; meteor shower nights get special themes. No account needed.</pre><button class="btn" type="button">복사</button></div></div>
+  </div>
+</section>
+</div>
+
+<script>
+document.querySelectorAll('.copy').forEach(box => {
+  const btn = box.querySelector('button'), pre = box.querySelector('pre');
+  btn.addEventListener('click', async () => {
+    const text = pre.innerText.trim();
+    try { await navigator.clipboard.writeText(text); }
+    catch {
+      const r = document.createRange(); r.selectNodeContents(pre);
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      btn.textContent = '선택했어요, 복사해 주세요'; return;
+    }
+    btn.textContent = '복사했어요'; btn.classList.add('done');
+    setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('done'); }, 1600);
+  });
+});
+</script>
