@@ -55,15 +55,14 @@ npm run dev
 ```
 http://localhost:5173 에서 닉네임으로 작품 올리기·별 주기·순위·뱃지·명예의 전당·지금 그리는 사람이 모두 동작합니다.
 
-**3. 인터넷에 배포**
+**3. 인터넷에 배포** (같은 폴더의 명령 프롬프트에서)
 ```cmd
-npm install -g firebase-tools
-firebase login
-firebase use --add
-npm run build:web
-firebase deploy
+npm run login
+npm run deploy
 ```
-`firebase use --add`에서 만든 프로젝트를 고르면 `.firebaserc`가 생깁니다. `firebase deploy`가 사이트(`dist-web/`)와 보안 규칙(`firestore.rules`: 모두 읽기, 각자 자기 문서만 쓰기)을 함께 올리고, 주소 `https://<프로젝트ID>.web.app`을 알려 줍니다. 고친 뒤에는 `npm run build:web`과 `firebase deploy`만 다시 하면 됩니다.
+`npm run login`은 컴퓨터마다 처음 한 번만 합니다. 브라우저가 열리면 Firebase 프로젝트를 만든 구글 계정으로 로그인하세요.
+`npm run deploy`가 `.env.local`의 프로젝트로 사이트(`dist-web/`)를 만들어 올리고, 보안 규칙(`firestore.rules`: 모두 읽기, 각자 자기 문서만 쓰기)도 함께 올린 뒤 주소 `https://<프로젝트ID>.web.app`을 알려 줍니다. 고친 뒤에는 `npm run deploy`만 다시 하면 됩니다.
+(firebase-tools는 따로 설치하지 않아도 됩니다. 스크립트가 `npx`로 정해진 버전을 받아 씁니다.)
 
 **알아 둘 점**
 - 처음엔 익명 로그인이라 브라우저마다 다른 사람이 됩니다. **내 뱃지 → 구글로 로그인**을 누르면:
