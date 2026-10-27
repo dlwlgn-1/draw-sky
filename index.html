@@ -1,0 +1,1163 @@
+<title>다시 그린 하늘</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: the whole screen is one real sky (stereographic projection). Choosing a constellation flies the sky to it. Controls float above and below the sky; lists open as bottom sheets. */
+:root{
+  --night:#080c19;      /* sky edge, page */
+  --panel:rgba(20,27,47,.92);
+  --panel-solid:rgba(17,23,42,.9);
+  --line:#2a3452;
+  --chalk:#f7efc6;      /* hand-drawn lines, primary action */
+  --sticker:#ffcf3f;    /* vote stars */
+  --text:#eef0f6; --sub:#a0a8bf; --dim:#677190;
+  --danger:#ff9a85;
+  --name:"Gowun Batang","Nanum Myeongjo",serif;
+  --ui:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%;overflow:hidden;background:var(--night)}
+body{color:var(--text);font-family:var(--ui);font-size:15px;line-height:1.55;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+[hidden]{display:none!important}
+h1,h2,h3{margin:0;font-family:var(--name);font-weight:700;text-wrap:balance;line-height:1.3}
+p{margin:0}
+b,strong{font-weight:400}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+button:disabled{cursor:default}
+:focus-visible{outline:2px solid var(--chalk);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.num{font-variant-numeric:tabular-nums}
+
+#sky{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+
+.inner{max-width:520px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));box-sizing:border-box}
+
+/* entrance */
+.intro{position:fixed;inset:0;z-index:15;background:#000;transition:opacity .9s ease}
+.intro.gone{opacity:0;pointer-events:none}
+.intro canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.intro .copy{position:absolute;left:0;right:0;top:44%;text-align:center;pointer-events:none;display:grid;gap:8px}
+.intro h1{font-size:2.4rem;letter-spacing:-.01em;opacity:.18}
+.intro .lead{font-size:.95rem;color:var(--sub)}
+.intro .hint-up{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 40px);text-align:center;font-size:.86rem;color:var(--sub);pointer-events:none}
+.intro .sr:focus{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 80px);transform:translateX(-50%);width:auto;height:auto;clip:auto;background:var(--chalk);color:var(--night);border-radius:999px;padding:8px 16px}
+.intro:not([hidden]):not(.gone) ~ .top,.intro:not([hidden]):not(.gone) ~ .bottom{opacity:0}
+.top,.bottom{transition:opacity .8s ease}
+
+/* top */
+.top{position:fixed;top:0;left:0;right:0;z-index:5;pointer-events:none;padding-top:calc(env(safe-area-inset-top,0px) + 10px);padding-bottom:30px;background:linear-gradient(to bottom,rgba(6,9,20,.72),rgba(6,9,20,.3) 60%,rgba(6,9,20,0))}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.logo{font-family:var(--name);font-weight:700;font-size:1.02rem;color:var(--sub);letter-spacing:-.01em}
+.clock{pointer-events:auto;font-size:.76rem;color:var(--sub);background:rgba(255,255,255,.07);border-radius:999px;padding:4px 11px;white-space:nowrap}
+.right{display:flex;align-items:center;gap:6px}
+.spin{pointer-events:auto;font-size:.76rem;color:var(--sub);background:rgba(255,255,255,.07);border-radius:999px;padding:4px 11px;white-space:nowrap}
+.spin[aria-pressed="true"]{color:var(--chalk);box-shadow:inset 0 0 0 1px rgba(247,239,198,.35)}
+.clock b{color:var(--text);display:inline-block;min-width:4.4em;text-align:right}
+.title{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:6px;margin-top:8px}
+.arrow{pointer-events:auto;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--text);background:rgba(255,255,255,.07)}
+.arrow svg{width:20px;height:20px}
+.arrow:active{background:rgba(255,255,255,.14)}
+.cname{pointer-events:auto;display:grid;justify-items:center;gap:1px;min-width:0;padding:2px 0}
+.cname .ko{font-family:var(--name);font-weight:700;font-size:1.75rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.cname .meta{font-size:.8rem;color:var(--sub);display:flex;align-items:center;gap:4px;white-space:nowrap}
+.cname .meta svg{width:12px;height:12px}
+
+/* bottom */
+.bottom{position:fixed;left:0;right:0;bottom:0;z-index:5;pointer-events:none;padding-top:40px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 14px);background:linear-gradient(to top,rgba(6,9,20,.84),rgba(6,9,20,.36) 55%,rgba(6,9,20,0))}
+.hint{font-size:.84rem;color:var(--sub);text-align:center;min-height:1.55em;margin-bottom:10px;overflow-wrap:anywhere}
+.hint b{color:var(--chalk)}
+.tools{display:flex;align-items:center;gap:6px;pointer-events:auto}
+.pill{background:rgba(29,39,64,.9);border-radius:999px;padding:7px 13px;font-size:.84rem;color:var(--text)}
+.pill:disabled{color:var(--dim)}
+.pill[aria-pressed="true"]{box-shadow:inset 0 0 0 1px var(--chalk);color:var(--chalk)}
+.tools .count{margin-left:auto;font-size:.8rem;color:var(--sub)}
+.dock{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;margin-top:10px;pointer-events:auto}
+.rankbtn{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:9px 14px;text-align:left;display:grid;min-width:0}
+.rankbtn .l{font-size:.74rem;color:var(--sub)}
+.rankbtn .s{font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rankbtn .s em{font-style:normal;font-family:var(--name);font-weight:700}
+.primary{background:var(--chalk);color:var(--night);font-family:var(--name);font-weight:700;font-size:1rem;border-radius:16px;padding:0 18px;min-height:54px}
+.primary:disabled{opacity:.45}
+
+.vcard{pointer-events:auto;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:14px 16px 12px}
+.vtop{display:flex;align-items:center;gap:8px}
+.vrank{font-family:var(--name);font-weight:700;color:var(--night);background:var(--sticker);border-radius:8px;padding:1px 8px;font-size:.9rem}
+.vrank.plain{background:rgba(255,255,255,.1);color:var(--text)}
+.vday{font-size:.8rem;color:var(--sub)}
+.x{margin-left:auto;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--sub);background:rgba(255,255,255,.07)}
+.x svg{width:16px;height:16px}
+.vcard h2{font-size:1.5rem;margin-top:8px;overflow-wrap:anywhere}
+.vby{font-size:.82rem;color:var(--sub);margin-top:2px}
+.vby b{color:var(--text)}
+.vstory{font-family:var(--name);font-size:.95rem;line-height:1.7;margin-top:8px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;white-space:pre-wrap}
+.vstory.none{color:var(--dim);font-family:var(--ui);font-size:.86rem}
+.vrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;margin-top:12px;align-items:center}
+.nav{background:rgba(255,255,255,.07);border-radius:12px;padding:11px 14px;font-size:.84rem}
+.nav:disabled{color:var(--dim)}
+.starbtn{grid-column:2;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:12px;padding:11px 10px;font-family:var(--name);font-weight:700;background:var(--sticker);color:var(--night);font-size:.95rem;white-space:nowrap}
+.starbtn svg{width:18px;height:18px;flex:none}
+.starbtn[aria-pressed="true"]{background:transparent;color:var(--sticker);box-shadow:inset 0 0 0 1.5px var(--sticker)}
+.starbtn:disabled{background:rgba(255,255,255,.07);color:var(--sub);box-shadow:none}
+#vNext{grid-column:3}
+.remove{display:block;margin:10px auto 0;color:var(--danger);font-size:.82rem}
+
+/* sheet */
+.scrim{position:fixed;inset:0;z-index:19;background:rgba(3,5,12,.35)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:20;max-width:520px;margin:0 auto;background:var(--panel-solid);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-radius:22px 22px 0 0;max-height:86%;overflow-y:auto;overscroll-behavior:contain;padding-top:8px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(28px);opacity:.5}to{transform:none;opacity:1}}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
+.sheet-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:4px}
+.sheet-head h2{font-size:1.25rem}
+.sheet-head button{font-size:.86rem;color:var(--sub);padding:4px 2px}
+.sub-note{font-size:.8rem;color:var(--dim);margin-bottom:10px}
+.notice{background:rgba(255,154,133,.1);color:var(--danger);border-radius:12px;padding:10px 12px;font-size:.84rem;margin-bottom:12px}
+
+.list{list-style:none;margin:0;padding:0;display:grid}
+.row{display:grid;grid-template-columns:26px 72px minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.row:last-child{border-bottom:0}
+.row .rk{font-family:var(--name);font-weight:700;font-size:1.1rem;text-align:center;color:var(--sub)}
+.row.first .rk{color:var(--sticker)}
+.row canvas{width:72px;height:54px;border-radius:8px;display:block}
+.meta{min-width:0;display:grid}
+.meta .nm{font-family:var(--name);font-weight:700;font-size:1.02rem;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meta .by{font-size:.76rem;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meta .by i{font-style:normal;color:var(--sticker)}
+.me-tag{color:var(--chalk)}
+.vote{display:inline-flex;flex-direction:column;align-items:center;gap:1px;min-width:46px;padding:6px 6px 5px;border-radius:12px;background:rgba(255,255,255,.06);color:var(--sub);font-size:.8rem}
+.vote svg{width:20px;height:20px}
+.vote[aria-pressed="true"]{background:rgba(255,207,63,.14);color:var(--sticker)}
+.vote:disabled{opacity:.55}
+.empty{background:rgba(255,255,255,.04);border-radius:14px;padding:20px 16px;color:var(--sub);font-size:.88rem}
+.empty b{display:block;font-family:var(--name);font-weight:700;font-size:1.1rem;color:var(--text);margin-bottom:4px}
+.yday{margin-top:22px}
+.yday h3{font-size:.95rem;color:var(--sub);font-family:var(--ui);font-weight:400}
+.yday .none{font-size:.84rem;color:var(--dim);padding:8px 0}
+
+.prow{display:grid;grid-template-columns:72px minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.prow:last-child{border-bottom:0}
+.prow canvas{width:72px;height:54px;display:block}
+.credit{font-size:.72rem;color:var(--dim);margin-top:14px;line-height:1.5}
+.prow .here{font-size:.74rem;color:var(--chalk);white-space:nowrap}
+.prow .go{font-size:.78rem;color:var(--sticker);background:rgba(255,207,63,.12);border-radius:10px;padding:6px 10px;white-space:nowrap}
+
+.form{display:grid;gap:10px}
+.preview{display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.04);border-radius:14px;padding:10px 12px}
+.preview canvas{width:84px;height:63px;display:block;flex:none}
+.preview p{font-size:.84rem;color:var(--sub)}
+.preview p b{color:var(--text)}
+.name-in{background:transparent;border:0;border-bottom:2px dashed var(--line);border-radius:0;padding:4px 0 6px;font-family:var(--name);font-weight:700;font-size:1.5rem;line-height:1.35;width:100%}
+.name-in::placeholder{color:var(--dim)}
+.name-in:focus{outline:none;border-bottom-color:var(--chalk)}
+.story-in{font-family:var(--name);background:rgba(255,255,255,.05);border:1px solid transparent;border-radius:12px;padding:11px 12px;width:100%;box-sizing:border-box;resize:none;min-height:5em;line-height:1.6}
+.story-in::placeholder{color:var(--dim)}
+.story-in:focus{outline:none;border-color:var(--line)}
+.counts{display:flex;justify-content:flex-end;gap:10px;font-size:.72rem;color:var(--dim);margin-top:-4px}
+.form .primary{width:100%;padding:15px}
+
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 132px);transform:translateX(-50%);z-index:30;background:var(--text);color:var(--night);font-size:.86rem;border-radius:12px;padding:10px 16px;max-width:min(420px,calc(100% - 32px));box-sizing:border-box;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.35);pointer-events:none}
+.toast.err{background:var(--danger)}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
+</style>
+
+<canvas id="sky" aria-label="밤하늘. 고른 별자리의 별을 차례로 눌러 선을 이어요. 하늘을 좌우로 밀거나 다른 별자리 이름을 누르면 하늘이 그쪽으로 움직여요."></canvas>
+
+<section class="intro" id="intro" aria-labelledby="introTitle">
+  <canvas id="introSky" aria-hidden="true"></canvas>
+  <div class="copy inner">
+    <h1 id="introTitle">다시 그린 하늘</h1>
+    <p class="lead">오늘 밤, 별을 다시 이어 보세요</p>
+  </div>
+  <p class="hint-up" id="introHint">작은 별을 위로 밀어 올려 주세요</p>
+  <button type="button" class="sr" id="introOpen">하늘 열기</button>
+</section>
+
+<header class="top">
+  <div class="inner">
+    <div class="bar">
+      <span class="logo">다시 그린 하늘</span>
+      <span class="right"><button type="button" class="spin" id="spinBtn" aria-pressed="true">이동 연출 켜짐</button><span class="clock num">마감까지 <b id="countdown">--:--:--</b></span></span>
+    </div>
+    <div class="title" id="titleUI">
+      <button class="arrow" id="prevC" aria-label="왼쪽 별자리로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
+      <button class="cname" id="cname" aria-haspopup="dialog"><span class="ko" id="cKo"></span><span class="meta"><span id="cMeta"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></button>
+      <button class="arrow" id="nextC" aria-label="오른쪽 별자리로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<footer class="bottom">
+  <div class="inner">
+    <div id="drawUI">
+      <p class="hint" id="hint"></p>
+      <div class="tools">
+        <button type="button" class="pill" id="undoBtn">되돌리기</button>
+        <button type="button" class="pill" id="clearBtn">지우기</button>
+        <button type="button" class="pill" id="ghostBtn" aria-pressed="false">원래 선</button>
+        <span class="count num" id="lineCount"></span>
+      </div>
+      <div class="dock">
+        <button type="button" class="rankbtn" id="rankBtn"><span class="l">오늘 순위</span><span class="s" id="rankSum">불러오는 중…</span></button>
+        <button type="button" class="primary" id="openForm">이름 짓고 올리기</button>
+      </div>
+    </div>
+    <div class="vcard" id="vcard" hidden>
+      <div class="vtop">
+        <span class="vrank" id="vRank"></span>
+        <span class="vday" id="vDay"></span>
+        <button type="button" class="x" id="vClose" aria-label="내 그림으로 돌아가기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      </div>
+      <h2 id="vName"></h2>
+      <p class="vby" id="vBy"></p>
+      <p class="vstory" id="vStory"></p>
+      <div class="vrow">
+        <button type="button" class="nav" id="vPrev">이전</button>
+        <button type="button" class="starbtn" id="vVote"></button>
+        <button type="button" class="nav" id="vNext">다음</button>
+      </div>
+      <button type="button" class="remove" id="vRemove" hidden>내 작품 내리기</button>
+    </div>
+  </div>
+</footer>
+
+<div class="scrim" id="scrim" hidden></div>
+<section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+  <div class="inner">
+    <div class="grab"></div>
+    <div class="sheet-head"><h2 id="sheetTitle"></h2><button type="button" id="sheetClose">닫기</button></div>
+
+    <div id="formBody" hidden>
+      <div class="notice" id="formNotice" hidden></div>
+      <form class="form" id="entryForm" novalidate>
+        <div class="preview"><canvas id="formThumb"></canvas><p id="formInfo"></p></div>
+        <label class="sr" for="nameInput">새 별자리 이름</label>
+        <input class="name-in" id="nameInput" maxlength="20" placeholder="이름을 지어 주세요" autocomplete="off">
+        <label class="sr" for="storyInput">이야기</label>
+        <textarea class="story-in" id="storyInput" maxlength="140" rows="3" placeholder="왜 이렇게 보였는지 한두 줄 남겨 주세요"></textarea>
+        <div class="counts num"><span id="nameLen">이름 0/20</span><span id="storyLen">이야기 0/140</span></div>
+        <button type="submit" class="primary" id="submitBtn">오늘 하늘에 올리기</button>
+      </form>
+    </div>
+
+    <div id="rankBody" hidden>
+      <p class="sub-note">별자리마다 하루 한 작품에만 별을 줄 수 있어요. 다른 작품에 주면 별이 옮겨 가요.</p>
+      <ol class="list" id="rankList"></ol>
+      <div class="empty" id="rankEmpty" hidden></div>
+      <div class="yday"><h3>어제 1위</h3><div id="yWinner"></div></div>
+    </div>
+
+    <div id="pickBody" hidden>
+      <p class="sub-note">고르면 하늘이 그 별자리로 움직여요.</p>
+      <ul class="list" id="pickList"></ul>
+      <p class="credit">별의 위치·밝기·색은 히파르코스 위성 관측을 정리한 XHIP 목록, 은하수 모양은 d3-celestial의 은하수 윤곽 데이터를 썼어요. 성운과 은하는 실제 위치와 크기에 맞춰 그렸어요.</p>
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(() => {
+"use strict";
+
+/* ---------- star data: [Bayer key, 이름, 적경(h), 적위(°), 등급] ---------- */
+const DATA = [
+  {id:"ori", ko:"오리온", la:"Orion", ab:"Ori", stars:[
+    ["α","베텔게우스",5.919,7.407,0.50],["β","리겔",5.242,-8.202,0.13],["γ","벨라트릭스",5.419,6.350,1.64],
+    ["δ","민타카",5.533,-0.299,2.23],["ε","알닐람",5.603,-1.202,1.69],["ζ","알니탁",5.679,-1.943,1.77],
+    ["κ","사이프",5.796,-9.670,2.06],["λ","메이사",5.585,9.934,3.39],["ι","하티사",5.590,-5.910,2.77],
+    ["π³","타비트",4.830,6.961,3.19],["π⁴","",4.853,5.605,3.69],["π⁵","",4.904,2.440,3.72],
+    ["π²","",4.844,8.900,4.35],["π¹","",4.915,10.151,4.65],["π⁶","",4.976,1.714,4.47],
+    ["ο²","",4.940,13.514,4.07],["μ","",6.040,9.647,4.12],["ξ","",6.199,14.209,4.48],
+    ["ν","",6.126,14.768,4.42],["χ¹","",5.906,20.276,4.39],["χ²","",6.065,20.138,4.63],
+    ["η","",5.408,-2.397,3.36],["τ","",5.293,-6.845,3.60]],
+    lines:"α-λ λ-γ α-ζ γ-δ δ-ε ε-ζ ζ-κ δ-β γ-π³ π¹-π² π²-π³ π³-π⁴ π⁴-π⁵ π⁵-π⁶ π¹-ο² α-μ μ-ξ ξ-ν ν-χ¹ χ¹-χ²"},
+  {id:"uma", ko:"큰곰", la:"Ursa Major", ab:"UMa", stars:[
+    ["α","두베",11.062,61.751,1.79],["β","메라크",11.031,56.382,2.37],["γ","페크다",11.897,53.695,2.44],
+    ["δ","메그레즈",12.257,57.033,3.31],["ε","알리오스",12.900,55.960,1.77],["ζ","미자르",13.399,54.925,2.27],
+    ["η","알카이드",13.792,49.313,1.86],["ο","무시다",8.504,60.718,3.36],["ι","탈리타",8.987,48.042,3.14],
+    ["κ","알카프잘",9.060,47.157,3.60],["λ","타니아 보레알리스",10.284,42.914,3.45],["μ","타니아 아우스트랄리스",10.372,41.499,3.05],
+    ["ν","알룰라 보레알리스",11.308,33.094,3.48],["ξ","알룰라 아우스트랄리스",11.303,31.529,3.79],["ψ","",11.161,44.498,3.01],
+    ["χ","알카프",11.767,47.779,3.71],["θ","",9.548,51.678,3.17],["υ","",9.849,59.039,3.80],
+    ["23","",9.525,63.062,3.65],["φ","",9.868,54.064,4.59]],
+    lines:"η-ζ ζ-ε ε-δ δ-α α-β β-γ γ-δ α-23 23-ο ο-υ υ-α υ-θ θ-ι ι-κ γ-χ χ-ψ ψ-μ μ-λ χ-ν ν-ξ"},
+  {id:"cas", ko:"카시오페이아", la:"Cassiopeia", ab:"Cas", stars:[
+    ["α","셰다르",0.675,56.537,2.24],["β","카프",0.153,59.150,2.28],["γ","나비",0.945,60.717,2.15],
+    ["δ","루크바",1.430,60.235,2.68],["ε","세긴",1.907,63.670,3.37],["η","아키르드",0.818,57.816,3.44],
+    ["κ","",0.550,62.932,4.16],["ζ","",0.617,53.897,3.66],["θ","",1.185,55.150,4.33],
+    ["ι","",2.486,67.402,4.52],["ρ","",23.906,57.500,4.54],["ο","",0.745,48.284,4.54],["φ","",1.336,58.232,4.98]],
+    lines:"β-α α-γ γ-δ δ-ε"},
+  {id:"cyg", ko:"백조", la:"Cygnus", ab:"Cyg", stars:[
+    ["α","데네브",20.690,45.280,1.25],["γ","사드르",20.370,40.257,2.23],["β","알비레오",19.512,27.960,3.05],
+    ["ε","알지나",20.770,33.970,2.48],["δ","파와리스",19.750,45.131,2.87],["ζ","",21.216,30.227,3.21],
+    ["η","",19.938,35.083,3.89],["ι","",19.495,51.730,3.79],["κ","",19.285,53.369,3.80],
+    ["ν","",20.953,41.167,3.94],["ξ","",21.082,43.928,3.72],["τ","",21.248,38.045,3.72],
+    ["θ","",19.607,50.221,4.48],["ο¹","",20.230,46.741,3.79],["μ","",21.735,28.743,4.48],["π²","",21.698,49.309,4.23]],
+    lines:"α-γ γ-η η-β δ-γ γ-ε ε-ζ δ-ι ι-κ"},
+  {id:"sco", ko:"전갈", la:"Scorpius", ab:"Sco", stars:[
+    ["α","안타레스",16.490,-26.432,1.06],["β","아크라브",16.091,-19.806,2.62],["δ","주바",16.006,-22.622,2.29],
+    ["π","",15.981,-26.114,2.89],["ρ","",15.948,-29.214,3.87],["σ","알니야트",16.353,-25.593,2.89],
+    ["τ","",16.598,-28.216,2.82],["ε","라라와그",16.836,-34.293,2.29],["μ¹","",16.864,-38.047,3.00],
+    ["ζ²","",16.910,-42.362,3.62],["η","",17.203,-43.239,3.33],["θ","사르가스",17.622,-42.998,1.86],
+    ["ι¹","",17.793,-40.127,2.99],["κ","기르타브",17.708,-39.030,2.39],["λ","샤울라",17.560,-37.104,1.62],
+    ["υ","레사트",17.513,-37.296,2.70],["ν","",16.200,-19.461,4.00],["ω¹","",16.113,-20.669,3.96]],
+    lines:"β-δ δ-π π-ρ δ-σ σ-α α-τ τ-ε ε-μ¹ μ¹-ζ² ζ²-η η-θ θ-ι¹ ι¹-κ κ-λ λ-υ β-ν"},
+  {id:"leo", ko:"사자", la:"Leo", ab:"Leo", stars:[
+    ["α","레굴루스",10.140,11.967,1.35],["β","데네볼라",11.818,14.572,2.13],["γ","알기에바",10.333,19.842,2.08],
+    ["δ","조스마",11.235,20.524,2.56],["θ","케르탄",11.237,15.430,3.33],["η","",10.122,16.763,3.48],
+    ["ζ","아다페라",10.278,23.417,3.43],["μ","라살라스",9.879,26.007,3.88],["ε","",9.764,23.774,2.98],
+    ["ι","",11.398,10.529,3.94],["σ","",11.353,6.029,4.05],["ο","수브라",9.686,9.892,3.52],
+    ["ρ","",10.546,9.307,3.85],["λ","알테르프",9.528,22.968,4.31],["κ","",9.411,26.182,4.46],["93","",11.798,20.219,4.53]],
+    lines:"α-η η-γ γ-ζ ζ-μ μ-ε γ-δ δ-β β-θ θ-α δ-θ θ-ι ι-σ"},
+  {id:"gem", ko:"쌍둥이", la:"Gemini", ab:"Gem", stars:[
+    ["α","카스토르",7.577,31.889,1.58],["β","폴룩스",7.755,28.026,1.14],["γ","알헤나",6.629,16.399,1.93],
+    ["μ","테자트",6.383,22.514,2.87],["η","프로푸스",6.248,22.507,3.30],["ε","메브수타",6.732,25.131,2.98],
+    ["δ","와사트",7.335,21.982,3.53],["ζ","메크부다",7.068,20.570,3.90],["ξ","알지르",6.755,12.896,3.35],
+    ["κ","",7.741,24.398,3.57],["ι","",7.429,27.798,3.79],["τ","",7.186,30.245,4.41],
+    ["λ","",7.301,16.540,3.58],["ν","",6.483,20.212,4.15],["θ","",6.880,33.961,3.60],["υ","",7.598,26.896,4.06]],
+    lines:"α-τ τ-ε ε-μ μ-η ε-ν τ-θ τ-ι ι-υ υ-β υ-κ υ-δ δ-ζ ζ-γ δ-λ λ-ξ"},
+  {id:"lyr", ko:"거문고", la:"Lyra", ab:"Lyr", stars:[
+    ["α","베가",18.616,38.784,0.03],["β","셸리아크",18.835,33.363,3.52],["γ","술라파트",18.982,32.690,3.25],
+    ["δ²","",18.908,36.899,4.30],["ζ¹","",18.746,37.605,4.36],["ε","",18.739,39.670,4.67],
+    ["η","알다파이라",19.230,39.146,4.43],["θ","",19.272,38.133,4.36],["κ","",18.331,36.064,4.33],["R","",18.920,43.946,4.04]],
+    lines:"α-ε α-ζ¹ ζ¹-β β-γ γ-δ² δ²-ζ¹"}
+];
+const D2R = Math.PI / 180, MAX_LINES = 80;
+const BYID = Object.create(null);
+function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const sph = (raH, decD, mag) => { const ra = raH * 15 * D2R, dec = decD * D2R; return { ra, sd: Math.sin(dec), cd: Math.cos(dec), mag }; };
+const vec = o => [o.cd * Math.cos(o.ra), o.cd * Math.sin(o.ra), o.sd];
+const norm = v => { const l = Math.hypot(v[0], v[1], v[2]) || 1; return [v[0] / l, v[1] / l, v[2] / l]; };
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+function slerp(a, b, t){
+  const ang = Math.acos(Math.max(-1, Math.min(1, dot(a, b))));
+  if (ang < 1e-6) return b;
+  const s = Math.sin(ang), k1 = Math.sin((1 - t) * ang) / s, k2 = Math.sin(t * ang) / s;
+  return norm([a[0] * k1 + b[0] * k2, a[1] * k1 + b[1] * k2, a[2] * k1 + b[2] * k2]);
+}
+
+for (const c of DATA){
+  BYID[c.id] = c;
+  c.sv = c.stars.map(s => sph(s[2], s[3], s[4]));
+  const v = norm(c.sv.reduce((a, o) => { const u = vec(o); return [a[0] + u[0], a[1] + u[1], a[2] + u[2]]; }, [0, 0, 0]));
+  c.cvec = v; c.cra = Math.atan2(v[1], v[0]); c.cdec = Math.asin(v[2]); c.cpt = { ra: c.cra, sd: Math.sin(c.cdec), cd: Math.cos(c.cdec) };
+  const k2i = Object.fromEntries(c.stars.map((s, i) => [s[0], i]));
+  c.orig = c.lines.split(" ").map(p => p.split("-").map(k => k2i[k]));
+  /* flat projection for the small thumbnails in lists */
+  const ref = c.stars[0][2], dec0 = c.stars.reduce((a, s) => a + s[3], 0) / c.stars.length, cosd = Math.cos(dec0 * D2R);
+  c.pts = c.stars.map(s => ({ x: -(((s[2] - ref + 36) % 24) - 12) * 15 * cosd, y: -s[3] }));
+  const xs = c.pts.map(p => p.x), ys = c.pts.map(p => p.y);
+  c.box = { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys) };
+}
+/* ordered west→east on screen: the right arrow goes to lower right ascension */
+const raOf = id => ((BYID[id].cra % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+const ORDER = DATA.map(c => c.id).sort((a, b) => raOf(b) - raOf(a));
+/* the real sky, loaded from sky.json (d3-celestial data): XHIP/Hipparcos stars to magnitude 7.5 with their B−V colour, and Milky Way outlines in five brightness steps */
+const SKY = { ready: false, bright: [], buckets: [], mw: null };
+const FALLBACK = DATA.flatMap(c => c.sv.map(o => ({ ...o, rgb: "247,243,230" })));
+const BV_RGB = [[-9, "170,191,255"], [0, "198,212,255"], [.3, "236,240,255"], [.6, "255,246,232"], [1, "255,226,190"], [1.4, "255,204,150"]];
+const bvRgb = bv => { let c = BV_RGB[0][1]; for (const [t, rgb] of BV_RGB) if (bv >= t) c = rgb; return c; };
+const MAG_BINS = [
+  { min: 7.3, max: 8.6, r: .3, a: .2, faint: true },
+  { min: 6.6, max: 7.3, r: .34, a: .3, faint: true },
+  { min: 5.8, max: 6.6, r: .42, a: .5 },
+  { min: 5, max: 5.8, r: .6, a: .66 },
+  { min: 4, max: 5, r: .85, a: .8 },
+  { min: 3, max: 4, r: 1.2, a: .92 }
+];
+function loadSky(data){
+  const f = data.stars, buckets = new Map();
+  for (let i = 0; i + 3 < f.length; i += 4){
+    const ra = f[i] / 100 * D2R, dec = f[i + 1] / 100 * D2R, mag = f[i + 2] / 100, rgb = bvRgb(f[i + 3] / 100);
+    const o = { ra, sd: Math.sin(dec), cd: Math.cos(dec), mag, rgb };
+    if (mag < 3){ SKY.bright.push(o); continue; }
+    const bi = MAG_BINS.findIndex(b => mag >= b.min && mag < b.max); if (bi < 0) continue;
+    const key = bi + "|" + rgb;
+    if (!buckets.has(key)) buckets.set(key, { list: [], rgb, ...MAG_BINS[bi] });
+    buckets.get(key).list.push(o);
+  }
+  SKY.buckets = [...buckets.values()];
+  SKY.mw = data.mw.map(rings => rings.map(r => {
+    const pts = [];
+    for (let i = 0; i + 1 < r.length; i += 2){ const ra = r[i] / 10 * D2R, dec = r[i + 1] / 10 * D2R; pts.push({ ra, sd: Math.sin(dec), cd: Math.cos(dec) }); }
+    return pts;
+  }));
+  SKY.ready = true;
+}
+
+/* ---------- time (KST) ---------- */
+const DAY = 864e5, KST = 9 * 36e5;
+const dayOf = t => new Date(t + KST).toISOString().slice(0, 10);
+const today = () => dayOf(Date.now());
+const yesterday = () => dayOf(Date.now() - DAY);
+const shortDay = d => `${+d.slice(5, 7)}월 ${+d.slice(8, 10)}일`;
+
+/* ---------- state ---------- */
+const S = {
+  cid: "ori", viewing: null, sheet: null, ghost: false, selected: null, down: null, noRefit: false,
+  drafts: {}, history: {}, players: new Map(), mine: null, loaded: false, dbChecked: false,
+  db: null, user: null, myId: null, canWrite: null, chain: Promise.resolve(),
+  day: today(), cam: null, reveal: 0, spin: true, P: [], R: [], labels: []
+};
+const cur = () => BYID[S.cid];
+const draft = (cid = S.cid) => S.drafts[cid] ||= { lines: [], name: "", story: "", touched: false };
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+function el(tag, cls, text){ const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+const css = getComputedStyle(document.documentElement), T = k => css.getPropertyValue(k).trim();
+const COL = { text: T("--text"), chalk: T("--chalk"), sub: T("--sub"), dim: T("--dim") };
+const UI = T("--ui");
+const reduceMotion = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+function fmtRA(h){ h = ((h % 24) + 24) % 24; let hh = Math.floor(h), mm = Math.round((h - hh) * 60); if (mm === 60){ hh = (hh + 1) % 24; mm = 0; } return `${hh}h ${String(mm).padStart(2, "0")}m`; }
+function fmtDec(d){ const s = d < 0 ? "−" : "+"; const a = Math.abs(d); let dd = Math.floor(a), mm = Math.round((a - dd) * 60); if (mm === 60){ dd++; mm = 0; } return `${s}${dd}° ${String(mm).padStart(2, "0")}′`; }
+function store(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+function load(k){ try { return JSON.parse(localStorage.getItem(k) || "null"); } catch { return null; } }
+const STAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m12 2.8 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.6l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg>';
+const STAR_O_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="m12 3.5 2.5 5.2 5.6.7-4.1 3.9 1 5.6L12 16.2l-5 2.7 1-5.6-4.1-3.9 5.6-.7z"/></svg>';
+let toastT;
+function toast(msg, err){ const t = $("#toast"); t.textContent = msg; t.classList.toggle("err", !!err); t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 2600); }
+
+/* ---------- the sky: stereographic camera ---------- */
+const sky = $("#sky"), ctx = sky.getContext("2d");
+function rawXY(o, ra0, sd0, cd0, floor = -0.95){
+  const da = o.ra - ra0, cda = Math.cos(da), cosc = sd0 * o.sd + cd0 * o.cd * cda, k = 2 / (1 + Math.max(cosc, floor));
+  return [k * o.cd * Math.sin(da), k * (cd0 * o.sd - sd0 * o.cd * cda), cosc];
+}
+function region(){
+  const h = sky.clientHeight;
+  const top = Math.min($("#titleUI").getBoundingClientRect().bottom + 8, h * .4);
+  const pane = S.viewing ? $("#vcard") : $("#drawUI");
+  const bot = Math.max(pane.getBoundingClientRect().top - 8, h * .5);
+  return { top, bot };
+}
+function fit(cid){
+  const c = BYID[cid], w = sky.clientWidth, { top, bot } = region();
+  let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
+  for (const o of c.sv){ const [X, Y] = rawXY(o, c.cra, c.cpt.sd, c.cpt.cd); minX = Math.min(minX, X); maxX = Math.max(maxX, X); minY = Math.min(minY, Y); maxY = Math.max(maxY, Y); }
+  const bw = Math.max(maxX - minX, .36), bh = Math.max(maxY - minY, .36);
+  const s = Math.min(w * .8 / bw, Math.max(140, bot - top) * .84 / bh);
+  return { ra: c.cra, dec: c.cdec, s, ox: (minX + maxX) / 2, oy: (minY + maxY) / 2, cy: (top + bot) / 2 };
+}
+function camera(st){
+  return { ra: st.ra, sd: Math.sin(st.dec), cd: Math.cos(st.dec), s: st.s, ox: st.ox, oy: st.oy, cx: sky.clientWidth / 2, cy: st.cy };
+}
+function proj(o, V, limit = -0.15){
+  const [X, Y, cosc] = rawXY(o, V.ra, V.sd, V.cd);
+  if (cosc < limit) return null;
+  return { x: V.cx - (X - V.ox) * V.s, y: V.cy - (Y - V.oy) * V.s, cosc };
+}
+const starR = (mag, unit) => Math.min(5.6, Math.max(1.25, (5 - mag) * 1.05)) * unit;
+
+/* a slightly bent, doubled stroke that stops short of each star, like chalk on a chart */
+function chalk(x, P, R, lines, o){
+  for (const [a, b] of lines){
+    const A = P[a], B = P[b]; if (!A || !B) continue;
+    const dx = B.x - A.x, dy = B.y - A.y, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len;
+    const ga = R[a] + o.gap, gb = R[b] + o.gap; if (len <= ga + gb + 2) continue;
+    const p = { x: A.x + ux * ga, y: A.y + uy * ga }, q = { x: B.x - ux * gb, y: B.y - uy * gb };
+    const r = rng(a * 977 + b * 131 + 7), bend = (r() - .5) * Math.min(9, len * .07);
+    const mx = (p.x + q.x) / 2 - uy * bend, my = (p.y + q.y) / 2 + ux * bend;
+    for (let k = 0; k < (o.passes || 1); k++){
+      const j = k ? (r() - .5) * 1.4 : 0;
+      x.globalAlpha = k ? .4 * (o.alpha || 1) : (o.alpha || .95); x.lineWidth = k ? o.w * .55 : o.w;
+      x.beginPath(); x.moveTo(p.x + j, p.y - j); x.quadraticCurveTo(mx + j, my - j, q.x - j, q.y + j); x.stroke();
+    }
+  }
+  x.globalAlpha = 1;
+}
+
+function paintBackground(x, w, h, cy, alpha){
+  const g = x.createRadialGradient(w / 2, cy, 0, w / 2, cy, Math.hypot(w, h) * .62);
+  g.addColorStop(0, "#0f162d"); g.addColorStop(.6, "#090e1f"); g.addColorStop(1, "#050812");
+  x.globalAlpha = alpha; x.fillStyle = g; x.fillRect(0, 0, w, h); x.globalAlpha = 1;
+}
+/* the Milky Way is filled at 1/6 size and scaled up, which softens its edges like a long exposure */
+const mwCanvas = document.createElement("canvas"), mwCtx = mwCanvas.getContext("2d");
+const MW_FILL = [[.058, "150,164,214"], [.072, "168,179,222"], [.086, "194,196,224"], [.1, "218,210,216"], [.115, "236,222,208"]];
+function paintMilky(x, V, w, h, k){
+  if (!SKY.mw) return;
+  const q = 6, cw = Math.ceil(w / q), ch = Math.ceil(h / q);
+  if (mwCanvas.width !== cw || mwCanvas.height !== ch){ mwCanvas.width = cw; mwCanvas.height = ch; }
+  const m = mwCtx; m.setTransform(1, 0, 0, 1, 0, 0); m.clearRect(0, 0, cw, ch); m.setTransform(1 / q, 0, 0, 1 / q, 0, 0);
+  SKY.mw.forEach((rings, lvl) => {
+    m.beginPath();
+    for (const ring of rings){
+      ring.forEach((o, i) => {
+        const [X, Y] = rawXY(o, V.ra, V.sd, V.cd, -0.55), px = V.cx - (X - V.ox) * V.s, py = V.cy - (Y - V.oy) * V.s;
+        if (i) m.lineTo(px, py); else m.moveTo(px, py);
+      });
+      m.closePath();
+    }
+    const [a, rgb] = MW_FILL[lvl] || MW_FILL[4];
+    m.fillStyle = `rgba(${rgb},${a})`; m.fill("evenodd");
+  });
+  x.save(); x.globalAlpha = k; x.imageSmoothingEnabled = true; x.imageSmoothingQuality = "high";
+  if ("filter" in x) x.filter = `blur(${Math.round(Math.min(w, h) / 60)}px)`;
+  x.drawImage(mwCanvas, 0, 0, cw * q, ch * q); x.restore();
+}
+/* deep-sky objects that show up in long exposures: [적경(h), 적위(°), 긴 지름(°), 짧은 지름(°), 방향각(°), 색, 세기] */
+const DSO = [
+  [5.588, -5.39, 1.6, 1.2, 0, "255,105,170", .4],    // M42 오리온 대성운
+  [5.588, -5.39, .32, .26, 0, "160,240,230", .32],   // M42 중심부
+  [3.79, 24.1, 1.7, 1.3, 0, "130,165,255", .3],      // M45 플레이아데스
+  [0.712, 41.27, 3.1, .95, 35, "255,232,205", .3],   // M31 안드로메다 은하
+  [0.712, 41.27, .7, .28, 35, "255,242,225", .4],
+  [18.06, -24.38, 1.4, .7, 0, "255,100,150", .36],   // M8 석호 성운
+  [18.04, -23.03, .5, .5, 0, "255,140,195", .26],    // M20 삼렬 성운
+  [20.98, 44.33, 2.0, 1.6, 0, "255,85,105", .2],     // 북아메리카 성운
+  [20.37, 40.3, 3.2, 2.4, 0, "255,95,115", .13],     // 사드르 주변
+  [16.45, -24.6, 4.0, 3.0, 0, "255,185,105", .12],   // 안타레스·뱀주인 ρ 구름
+  [16.42, -23.4, 1.2, 1.0, 0, "140,165,255", .2],
+  [4.0, 36.4, 2.4, .7, 120, "255,85,105", .17],      // 캘리포니아 성운
+  [6.53, 4.95, 1.3, 1.3, 0, "255,100,130", .2],      // 장미 성운
+  [2.55, 61.5, 1.6, 1.4, 0, "255,95,120", .16],      // 하트 성운
+  [2.33, 57.1, .9, .6, 90, "190,210,255", .2],       // 페르세우스 이중 성단
+  [8.67, 19.98, 1.2, 1.2, 0, "220,225,255", .12],    // M44 벌집 성단
+  [9.93, 69.0, .45, .2, 150, "255,240,220", .26]     // M81
+].map(([ra, dec, a, b, pa, rgb, k]) => ({ ...sph(ra, dec, 0), n: sph(ra, dec + .6, 0), a: a * D2R, b: b * D2R, pa: pa * D2R, rgb, k }));
+function paintDSO(x, V, w, h, k){
+  x.save(); x.globalCompositeOperation = "lighter";
+  for (const o of DSO){
+    const p = proj(o, V, .2); if (!p) continue;
+    const sc = V.s * 2 / (1 + p.cosc), A = Math.max(2, o.a * sc / 2), B = Math.max(1.5, o.b * sc / 2);
+    if (p.x + A < 0 || p.y + A < 0 || p.x - A > w || p.y - A > h) continue;
+    const n = proj(o.n, V, -1), north = n ? Math.atan2(n.y - p.y, n.x - p.x) : -Math.PI / 2;
+    x.save(); x.translate(p.x, p.y); x.rotate(north - o.pa); x.scale(A, B);
+    const g = x.createRadialGradient(0, 0, 0, 0, 0, 1);
+    g.addColorStop(0, `rgba(${o.rgb},${o.k * k})`); g.addColorStop(.45, `rgba(${o.rgb},${o.k * .45 * k})`); g.addColorStop(1, `rgba(${o.rgb},0)`);
+    x.fillStyle = g; x.beginPath(); x.arc(0, 0, 1, 0, 7); x.fill(); x.restore();
+  }
+  x.restore();
+}
+/* stars, binned by brightness and colour so each frame fills a few dozen paths */
+function paintField(x, V, w, h, unit){
+  for (const b of SKY.buckets){
+    const r = b.r * unit;
+    x.beginPath();
+    for (const o of b.list){
+      const p = proj(o, V, 0); if (!p || p.x < -2 || p.y < -2 || p.x > w + 2 || p.y > h + 2) continue;
+      x.moveTo(p.x + r, p.y); x.arc(p.x, p.y, r, 0, 7);
+    }
+    x.fillStyle = `rgba(${b.rgb},${b.a})`; x.fill();
+  }
+  for (const o of SKY.ready ? SKY.bright : FALLBACK){
+    const p = proj(o, V, 0); if (!p || p.x < -40 || p.y < -40 || p.x > w + 40 || p.y > h + 40) continue;
+    const r = Math.max(1.3, Math.min(4.6, 1.3 + (3 - o.mag) * .75)) * unit;
+    const g = x.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 3.4);
+    g.addColorStop(0, `rgba(${o.rgb},.32)`); g.addColorStop(1, `rgba(${o.rgb},0)`);
+    x.fillStyle = g; x.beginPath(); x.arc(p.x, p.y, r * 3.4, 0, 7); x.fill();
+    x.fillStyle = `rgb(${o.rgb})`; x.beginPath(); x.arc(p.x, p.y, r * .75, 0, 7); x.fill();
+    if (o.mag < 1.2){   /* faint diffraction spikes on the brightest stars, as in telescope photos */
+      const L = r * (6 + (1.2 - o.mag) * 4); x.strokeStyle = `rgba(${o.rgb},.2)`; x.lineWidth = .8;
+      x.beginPath(); x.moveTo(p.x - L, p.y); x.lineTo(p.x + L, p.y); x.moveTo(p.x, p.y - L); x.lineTo(p.x, p.y + L); x.stroke();
+    }
+  }
+}
+
+function draw(){
+  const w = sky.clientWidth, h = sky.clientHeight; if (!w || !h || !S.cam) return 1;
+  const dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(w * dpr), H = Math.round(h * dpr);
+  if (sky.width !== W || sky.height !== H){ sky.width = W; sky.height = H; }
+  const x = ctx; x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const V = camera(S.cam), unit = Math.min(1.3, Math.max(.85, Math.min(w, h) / 420));
+
+  paintBackground(x, w, h, V.cy, 1);
+  paintMilky(x, V, w, h, 1);
+  paintDSO(x, V, w, h, 1);
+  paintField(x, V, w, h, unit);
+  const rv = S.reveal ? Math.min(1, (performance.now() - S.reveal) / 1000) : 1, rve = rv * rv * (3 - 2 * rv);
+
+  /* other constellations: their stars, and their names as places to fly to */
+  S.labels = [];
+  x.font = `13px ${UI}`; x.textAlign = "center";
+  for (const c of DATA){
+    if (c.id === S.cid) continue;
+    const cp = proj(c.cpt, V, .25);
+    if (cp && cp.x > 30 && cp.x < w - 30 && cp.y > 40 && cp.y < h - 40){
+      const label = `${c.ko}자리`, tw = x.measureText(label).width;
+      x.globalAlpha = .6 * rve; x.fillStyle = COL.sub; x.fillText(label, cp.x, cp.y + 22);
+      S.labels.push({ cid: c.id, x0: cp.x - tw / 2 - 12, x1: cp.x + tw / 2 + 12, y0: cp.y - 6, y1: cp.y + 34 });
+    }
+  }
+  x.globalAlpha = 1; x.textAlign = "left";
+
+  /* the chosen constellation lights up after the sky stops */
+  const c = cur(), v = viewedEntry(), lines = v ? v.lines : draft().lines;
+  S.P = c.sv.map(o => proj(o, V, -0.5)); S.R = c.sv.map(o => starR(o.mag, unit));
+  x.lineCap = "round";
+  if (S.ghost){ x.save(); x.setLineDash([3, 5]); x.strokeStyle = COL.sub; chalk(x, S.P, S.R, c.orig, { w: 1, gap: 4, alpha: .55 * rve }); x.restore(); }
+  if (lines.length){ x.save(); x.strokeStyle = COL.chalk; x.shadowColor = "rgba(247,239,198,.5)"; x.shadowBlur = 6 + (1 - rve) * 14; chalk(x, S.P, S.R, lines, { w: 2.1, gap: 5, passes: 2, alpha: .95 * rve }); x.restore(); }
+  const swell = 1 + (1 - rve) * 1.6;
+  c.sv.forEach((o, i) => {
+    const p = S.P[i]; if (!p) return; const r = S.R[i], gr = r * (o.mag < 2.6 ? 4.4 : 3) * swell;
+    const gg = x.createRadialGradient(p.x, p.y, 0, p.x, p.y, gr);
+    gg.addColorStop(0, `rgba(247,239,198,${.3 * (.4 + .6 * rve)})`); gg.addColorStop(1, "rgba(247,239,198,0)");
+    x.fillStyle = gg; x.beginPath(); x.arc(p.x, p.y, gr, 0, 7); x.fill();
+    x.fillStyle = COL.text; x.beginPath(); x.arc(p.x, p.y, r, 0, 7); x.fill();
+    if (i === S.selected && !v){ x.strokeStyle = COL.chalk; x.lineWidth = 2; x.beginPath(); x.arc(p.x, p.y, r + 7, 0, 7); x.stroke(); }
+  });
+  if (S.selected != null && !v && S.P[S.selected]){
+    const s = c.stars[S.selected], p = S.P[S.selected], label = s[1] || `${s[0]} ${c.ab}`;
+    x.font = `13px ${UI}`; const tw = x.measureText(label).width;
+    let lx = p.x + 14, ly = p.y - 12; if (lx + tw > w - 8) lx = p.x - 14 - tw; if (ly < 16) ly = p.y + 24;
+    x.fillStyle = "rgba(8,12,25,.82)"; x.beginPath(); if (x.roundRect) x.roundRect(lx - 6, ly - 14, tw + 12, 20, 6); else x.rect(lx - 6, ly - 14, tw + 12, 20); x.fill();
+    x.fillStyle = COL.chalk; x.fillText(label, lx, ly);
+  }
+  return rv;
+}
+
+let anim = null, rq = 0;
+function requestDraw(){ if (rq || anim) return; rq = requestAnimationFrame(() => { rq = 0; draw(); }); }
+const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const lerp = (p, q, k) => p + (q - p) * k;
+const geo = (p, q, k) => Math.exp(Math.log(p) + (Math.log(q) - Math.log(p)) * k);
+function startReveal(){
+  S.reveal = performance.now();
+  const loop = () => { if (anim) return; const rv = draw(); if (rv < 1) requestAnimationFrame(loop); else S.reveal = 0; };
+  requestAnimationFrame(loop);
+}
+/* The sky pulls back a little and glides along the great circle to the next constellation.
+   With the effect off, it switches at once. */
+function flyTo(cid, quick){
+  const to = fit(cid), first = !S.cam;
+  if (first || reduceMotion || (!quick && !S.spin)){ S.cam = to; anim = null; if (first || quick) requestDraw(); else startReveal(); return; }
+  const from = { ...S.cam };
+  const va = vec({ ra: from.ra, sd: Math.sin(from.dec), cd: Math.cos(from.dec) }), vb = vec({ ra: to.ra, sd: Math.sin(to.dec), cd: Math.cos(to.dec) });
+  const ang = Math.acos(Math.max(-1, Math.min(1, dot(va, vb))));
+  const running = !!anim;
+  anim = { from, to, va, vb, t0: performance.now(), dur: quick ? 420 : 700 + 800 * Math.min(1, ang / 1.6), bump: quick ? 0 : Math.min(.6, ang * .45), quick: !!quick };
+  if (!running) requestAnimationFrame(step);
+}
+function step(now){
+  const a = anim; if (!a) return;
+  const t = Math.min(1, (now - a.t0) / a.dur), e = ease(t), v = slerp(a.va, a.vb, e), f = a.from, o = a.to;
+  S.cam = {
+    ra: Math.atan2(v[1], v[0]), dec: Math.asin(v[2]),
+    s: geo(f.s, o.s, e) * (1 - a.bump * Math.sin(Math.PI * t)),
+    ox: lerp(f.ox, o.ox, e), oy: lerp(f.oy, o.oy, e), cy: lerp(f.cy, o.cy, e)
+  };
+  draw();
+  if (t < 1) requestAnimationFrame(step);
+  else { anim = null; S.cam = { ...o }; if (a.quick) draw(); else startReveal(); }
+}
+
+/* list thumbnails use a flat projection of one constellation */
+function drawThumb(cv, c, o = {}){
+  const w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
+  const dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(w * dpr), H = Math.round(h * dpr);
+  if (cv.width !== W || cv.height !== H){ cv.width = W; cv.height = H; }
+  const x = cv.getContext("2d"); x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const b = c.box, bw = (b.maxX - b.minX) || 1, bh = (b.maxY - b.minY) || 1, pad = Math.max(5, w * .1);
+  const s = Math.min((w - 2 * pad) / bw, (h - 2 * pad) / bh), ox = (w - bw * s) / 2 - b.minX * s, oy = (h - bh * s) / 2 - b.minY * s;
+  const P = c.pts.map(p => ({ x: p.x * s + ox, y: p.y * s + oy })), unit = Math.max(.42, w / 170), R = c.stars.map(st => starR(st[4], unit) * .9);
+  if (o.bare) x.clearRect(0, 0, w, h);
+  else { const g = x.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w * .7); g.addColorStop(0, "#18213f"); g.addColorStop(1, "#090d1b"); x.fillStyle = g; x.fillRect(0, 0, w, h); }
+  x.lineCap = "round";
+  if (o.ghost){ x.save(); x.setLineDash([2, 3]); x.strokeStyle = COL.sub; chalk(x, P, R, c.orig, { w: 1, gap: 1.5, alpha: o.ghostAlpha || .5 }); x.restore(); }
+  if (o.lines && o.lines.length){ x.strokeStyle = COL.chalk; chalk(x, P, R, o.lines, { w: 1.2, gap: 1.5 }); }
+  x.fillStyle = COL.text;
+  P.forEach((p, i) => { x.beginPath(); x.arc(p.x, p.y, R[i], 0, 7); x.fill(); });
+}
+
+/* ---------- data from the shared store ---------- */
+const str = (v, n) => typeof v === "string" ? v.trim().slice(0, n) : "";
+function cleanLines(v, n){
+  if (!Array.isArray(v)) return [];
+  const seen = new Set(), out = [];
+  for (const p of v.slice(0, MAX_LINES)){
+    if (!Array.isArray(p) || p.length !== 2) continue;
+    let [a, b] = p; if (!Number.isInteger(a) || !Number.isInteger(b) || a === b || a < 0 || b < 0 || a >= n || b >= n) continue;
+    if (a > b) [a, b] = [b, a]; const k = a + "-" + b; if (seen.has(k)) continue; seen.add(k); out.push([a, b]);
+  }
+  return out;
+}
+function cleanPlayer(d){
+  const out = { entries: {}, votes: {} };
+  const E = d && typeof d.entries === "object" && d.entries || {};
+  for (const k of Object.keys(E)){
+    const e = E[k]; if (!e || typeof e !== "object") continue;
+    const c = typeof e.c === "string" && Object.hasOwn(BYID, e.c) ? BYID[e.c] : null;
+    if (!c || typeof e.d !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(e.d) || k !== e.d + "_" + e.c) continue;
+    const lines = cleanLines(e.lines, c.stars.length); if (!lines.length) continue;
+    out.entries[k] = { c: e.c, d: e.d, name: str(e.name, 20) || "이름 없는 별자리", story: str(e.story, 140), lines, t: Number.isFinite(e.t) ? e.t : 0 };
+  }
+  const V = d && typeof d.votes === "object" && d.votes || {};
+  for (const day of Object.keys(V)){
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !V[day] || typeof V[day] !== "object") continue;
+    const m = {}; for (const cid of Object.keys(V[day])) if (Object.hasOwn(BYID, cid) && typeof V[day][cid] === "string") m[cid] = V[day][cid].slice(0, 200);
+    out.votes[day] = m;
+  }
+  return out;
+}
+function ranking(day, cid){
+  const list = [];
+  for (const [id, p] of S.players){ const e = p.entries[day + "_" + cid]; if (e) list.push({ author: id, ...e, votes: 0 }); }
+  const by = new Map(list.map(e => [e.author, e]));
+  for (const [id, p] of S.players){ const v = p.votes[day] && p.votes[day][cid]; if (v && v !== id && by.has(v)) by.get(v).votes++; }
+  list.sort((a, b) => b.votes - a.votes || a.t - b.t);
+  let rank = 0, prev = null; list.forEach((e, i) => { if (e.votes !== prev){ rank = i + 1; prev = e.votes; } e.rank = rank; });
+  return list;
+}
+function viewedEntry(){
+  if (!S.viewing) return null;
+  return ranking(S.viewing.day, S.cid).find(e => e.author === S.viewing.author) || null;
+}
+const myVote = (day, cid) => S.mine && S.mine.votes[day] ? S.mine.votes[day][cid] || null : null;
+const canAct = () => !!(S.db && S.myId && S.loaded && S.canWrite !== false);
+function whyNot(){
+  if (!S.db) return "저장소에 연결되지 않아 지금은 그려 보기만 할 수 있어요.";
+  if (!S.myId) return "로그인해야 올리고 별을 줄 수 있어요.";
+  if (S.canWrite === false) return "보기 전용 링크예요. 공유한 사람에게 참여 권한을 요청하세요.";
+  if (!S.loaded) return "작품을 불러오는 중이에요.";
+  return "";
+}
+
+/* ---------- writes (one at a time, only my own document) ---------- */
+function prune(doc){
+  const cut = dayOf(Date.now() - 7 * DAY);
+  for (const k of Object.keys(doc.entries)) if (doc.entries[k].d < cut) delete doc.entries[k];
+  for (const d of Object.keys(doc.votes)) if (d < cut || !Object.keys(doc.votes[d]).length) delete doc.votes[d];
+}
+function writeMine(mutate){
+  const run = async () => {
+    const base = JSON.parse(JSON.stringify(S.mine || { entries: {}, votes: {} }));
+    mutate(base); prune(base);
+    await S.db.doc("players/" + S.myId).set(base);
+    S.mine = cleanPlayer(base); S.players.set(S.myId, S.mine); renderUI();
+  };
+  const p = S.chain.then(run); S.chain = p.catch(() => {}); return p;
+}
+function writeError(err){
+  const code = err && err.code;
+  if (code === "invalid_argument"){ S.canWrite = false; renderUI(); return "이 링크에서는 저장할 권한이 없어요."; }
+  if (code === "quota_exceeded") return "저장 공간이 가득 찼어요.";
+  if (code === "resource_exhausted") return "너무 빨라요. 몇 초 뒤에 다시 눌러 주세요.";
+  return "저장하지 못했어요. 연결을 확인해 주세요.";
+}
+async function names(ids){
+  const out = {}; let ps = {};
+  if (S.user && ids.length){ try { ps = await S.user.profiles(ids); } catch {} }
+  for (const id of ids) out[id] = id === S.myId ? "나" : (ps[id] && ps[id].name) || "익명의 관측자";
+  return out;
+}
+
+/* ---------- UI rendering ---------- */
+function renderTop(){
+  const c = cur(), n = ranking(today(), S.cid).length;
+  $("#cKo").textContent = `${c.ko}자리`;
+  $("#cMeta").textContent = `${c.la} · ${!S.loaded && S.db ? "…" : n ? `오늘 ${n}작품` : "오늘 아직 없음"}`;
+  $("#cname").setAttribute("aria-label", `${c.ko}자리, 별자리 목록 열기`);
+}
+let vSeq = 0;
+async function renderBottom(){
+  const c = cur(), v = viewedEntry();
+  if (S.viewing && !v) S.viewing = null;
+  const wasView = !$("#vcard").hidden;
+  $("#drawUI").hidden = !!S.viewing; $("#vcard").hidden = !S.viewing;
+  if (wasView !== !!S.viewing && !S.noRefit) requestAnimationFrame(() => flyTo(S.cid, true));
+  if (!S.viewing){
+    const d = draft(), hint = $("#hint"); hint.textContent = "";
+    if (S.selected != null){
+      const s = c.stars[S.selected];
+      hint.append(el("b", null, `${s[0]} ${c.ab}${s[1] ? " " + s[1] : ""}`), document.createTextNode(` · ${s[4].toFixed(1)}등급 · 적경 ${fmtRA(s[2])} 적위 ${fmtDec(s[3])}`));
+    } else if (!d.lines.length) hint.textContent = "밝게 빛나는 별 두 개를 차례로 눌러 선을 이어 보세요";
+    else hint.textContent = "하늘을 좌우로 밀면 다른 별자리로 넘어가요";
+    $("#lineCount").textContent = d.lines.length ? `선 ${d.lines.length}개` : "";
+    $("#undoBtn").disabled = !(S.history[S.cid] && S.history[S.cid].length);
+    $("#clearBtn").disabled = !d.lines.length;
+    $("#ghostBtn").setAttribute("aria-pressed", String(S.ghost));
+    const list = ranking(today(), S.cid), mine = list.find(e => e.author === S.myId), sum = $("#rankSum"); sum.textContent = "";
+    if (S.db && !S.loaded) sum.textContent = "불러오는 중…";
+    else if (mine) sum.textContent = `내 작품 ${mine.rank}위 · ${list.length}작품`;
+    else if (list.length) sum.append(el("em", null, list[0].name), document.createTextNode(` 1위 · ${list.length}작품`));
+    else sum.textContent = "아직 아무도 안 그렸어요";
+    $("#openForm").textContent = mine ? "고쳐서 다시 올리기" : "이름 짓고 올리기";
+    return;
+  }
+  const seq = ++vSeq, isToday = S.viewing.day === today(), list = ranking(S.viewing.day, S.cid), i = list.findIndex(e => e.author === v.author);
+  const nm = await names([v.author]); if (seq !== vSeq || !S.viewing) return;
+  const rk = $("#vRank"); rk.textContent = `${v.rank}위`; rk.classList.toggle("plain", !(v.rank === 1 && v.votes > 0));
+  $("#vDay").textContent = isToday ? `오늘 ${list.length}작품 중` : `${shortDay(S.viewing.day)} 1위`;
+  $("#vName").textContent = v.name;
+  const by = $("#vBy"); by.textContent = ""; by.append(el("b", null, nm[v.author]), document.createTextNode(` · 별 ${v.votes}개 · 선 ${v.lines.length}개`));
+  const st = $("#vStory"); st.textContent = v.story || "이야기 없이 선만 남긴 작품이에요."; st.classList.toggle("none", !v.story);
+  fillStar($("#vVote"), v, S.cid, isToday);
+  $("#vPrev").disabled = i <= 0; $("#vNext").disabled = i < 0 || i >= list.length - 1;
+  $("#vPrev").hidden = $("#vNext").hidden = list.length < 2;
+  $("#vRemove").hidden = !(v.author === S.myId && isToday);
+}
+function fillStar(b, e, cid, isToday){
+  const mine = e.author === S.myId, voted = isToday && myVote(today(), cid) === e.author;
+  b.innerHTML = voted || mine ? STAR_SVG : STAR_O_SVG;
+  b.append(document.createTextNode(!isToday ? `별 ${e.votes}개` : mine ? `내 작품 · ${e.votes}` : voted ? `별 줬어요 · ${e.votes}` : `별 주기 · ${e.votes}`));
+  b.setAttribute("aria-pressed", String(voted));
+  b.disabled = mine || !isToday || !canAct();
+  b.setAttribute("aria-label", `${mine ? "내 작품" : voted ? "별 회수하기" : "별 주기"}, 별 ${e.votes}개`);
+}
+function voteChip(e, cid, isToday){
+  const b = el("button", "vote num"); b.type = "button";
+  const mine = e.author === S.myId, voted = isToday && myVote(today(), cid) === e.author;
+  b.innerHTML = voted ? STAR_SVG : STAR_O_SVG; b.append(document.createTextNode(String(e.votes)));
+  b.setAttribute("aria-pressed", String(voted)); b.disabled = mine || !isToday || !canAct();
+  b.setAttribute("aria-label", `${mine ? "내 작품" : voted ? "별 회수하기" : "별 주기"}, 별 ${e.votes}개`);
+  b.addEventListener("click", ev => { ev.stopPropagation(); vote(e.author, cid); });
+  return b;
+}
+function entryRow(e, nm, day){
+  const li = el("li", "row" + (e.rank === 1 && e.votes > 0 ? " first" : ""));
+  li.tabIndex = 0; li.setAttribute("role", "button"); li.setAttribute("aria-label", `${e.rank}위 ${e.name}, 하늘에서 보기`);
+  const cv = el("canvas"), meta = el("div", "meta"), by = el("span", "by");
+  if (e.author === S.myId) by.append(el("span", "me-tag", "내 작품")); else by.textContent = nm[e.author];
+  meta.append(el("span", "nm", e.name), by);
+  li.append(el("span", "rk num", String(e.rank)), cv, meta, voteChip(e, e.c, day === today()));
+  const open = () => { closeSheet(); showEntry(day, e.author); };
+  li.addEventListener("click", open);
+  li.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); open(); } });
+  requestAnimationFrame(() => drawThumb(cv, BYID[e.c], { lines: e.lines }));
+  return li;
+}
+let sSeq = 0;
+async function renderSheet(){
+  const sh = $("#sheet"), scrim = $("#scrim");
+  sh.hidden = scrim.hidden = !S.sheet;
+  if (!S.sheet) return;
+  $("#formBody").hidden = S.sheet !== "form"; $("#rankBody").hidden = S.sheet !== "rank"; $("#pickBody").hidden = S.sheet !== "pick";
+  const c = cur(), d = today(), seq = ++sSeq;
+  if (S.sheet === "form"){
+    $("#sheetTitle").textContent = `${c.ko}자리에 새 이름 붙이기`;
+    const dr = draft(), mine = S.mine && S.mine.entries[d + "_" + S.cid];
+    const n = $("#formNotice"), why = canAct() ? "" : whyNot(); n.hidden = !why; n.textContent = why;
+    const info = $("#formInfo"); info.textContent = "";
+    if (dr.lines.length < 2) info.append(el("b", null, "선을 두 개 이상 이어야 올릴 수 있어요."), document.createTextNode(" 시트를 닫고 하늘에서 별을 이어 주세요."));
+    else info.append(el("b", null, `선 ${dr.lines.length}개 · 별 ${new Set(dr.lines.flat()).size}개`), document.createTextNode(mine ? " · 오늘 올린 작품을 이 그림으로 바꿔요" : " · 오늘 자정까지 순위에 올라가요"));
+    $("#submitBtn").textContent = mine ? "고친 내용으로 다시 올리기" : "오늘 하늘에 올리기";
+    $("#submitBtn").disabled = !canAct();
+    requestAnimationFrame(() => drawThumb($("#formThumb"), c, { lines: dr.lines, ghost: !dr.lines.length, bare: true }));
+    return;
+  }
+  if (S.sheet === "rank"){
+    $("#sheetTitle").textContent = `${c.ko}자리 오늘 순위`;
+    const list = ranking(d, S.cid), ylist = ranking(yesterday(), S.cid), yw = ylist[0] && ylist[0].votes > 0 ? ylist[0] : null;
+    const nm = await names([...new Set([...list.map(e => e.author), ...(yw ? [yw.author] : [])])]);
+    if (seq !== sSeq) return;
+    const ol = $("#rankList"); ol.textContent = ""; for (const e of list) ol.append(entryRow(e, nm, d));
+    const empty = $("#rankEmpty"); empty.hidden = !!list.length; empty.textContent = "";
+    if (!list.length){
+      if (S.db && !S.loaded) empty.append(el("b", null, "불러오는 중…"));
+      else empty.append(el("b", null, "아직 아무도 안 그렸어요"), document.createTextNode(`오늘 ${c.ko}자리를 처음 다시 그리면 바로 1위예요.`));
+    }
+    const y = $("#yWinner"); y.textContent = "";
+    if (yw){ const ul = el("ol", "list"); ul.append(entryRow(yw, nm, yesterday())); y.append(ul); }
+    else y.append(el("p", "none", S.db && !S.loaded ? "불러오는 중…" : "어제는 별을 받은 작품이 없었어요."));
+    return;
+  }
+  $("#sheetTitle").textContent = "별자리 고르기";
+  const rows = ORDER.map(id => ({ k: BYID[id], list: ranking(d, id) }));
+  const nm = await names([...new Set(rows.flatMap(r => r.list.length ? [r.list[0].author] : []))]);
+  if (seq !== sSeq) return;
+  const ul = $("#pickList"); ul.textContent = "";
+  for (const { k, list } of rows){
+    const li = el("li", "prow"); li.tabIndex = 0; li.setAttribute("role", "button");
+    const cv = el("canvas"), meta = el("div", "meta"), top = list[0];
+    meta.append(el("span", "nm", `${k.ko}자리`));
+    const by = el("span", "by");
+    if (top) by.append(el("i", null, `★${top.votes}`), document.createTextNode(` 1위 ‘${top.name}’ · ${nm[top.author]} · ${list.length}작품`));
+    else by.textContent = `${k.la} · 오늘 아직 없음`;
+    meta.append(by);
+    li.append(cv, meta);
+    if (k.id === S.cid) li.append(el("span", "here", "지금 여기"));
+    else if (top){ const go = el("button", "go", "1위 보기"); go.type = "button"; go.addEventListener("click", ev => { ev.stopPropagation(); closeSheet(); selectConst(k.id, { day: d, author: top.author }); }); li.append(go); }
+    li.setAttribute("aria-label", `${k.ko}자리로 이동`);
+    const pick = () => { closeSheet(); if (k.id !== S.cid) selectConst(k.id); };
+    li.addEventListener("click", pick);
+    li.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); pick(); } });
+    ul.append(li);
+    requestAnimationFrame(() => drawThumb(cv, k, { ghost: true, bare: true, ghostAlpha: .8 }));
+  }
+}
+function renderUI(){ renderTop(); renderBottom(); if (S.sheet) renderSheet(); requestDraw(); }
+
+/* ---------- actions ---------- */
+function selectConst(cid, view = null, dir = 0){
+  S.cid = cid; S.selected = null; S.down = null; S.viewing = view; store("rs-cid", cid);
+  S.noRefit = true; renderTop(); renderBottom(); S.noRefit = false;
+  requestAnimationFrame(() => flyTo(cid, false, dir));
+}
+function stepConst(dir){ const i = ORDER.indexOf(S.cid); selectConst(ORDER[(i + dir + ORDER.length) % ORDER.length], null, dir); }
+function showEntry(day, author){ S.viewing = { day, author }; S.selected = null; renderBottom(); requestDraw(); }
+function openSheet(kind){
+  S.sheet = kind;
+  if (kind === "form"){ const d = draft(); $("#nameInput").value = d.name; $("#storyInput").value = d.story; updateLens(); }
+  renderSheet();
+}
+function closeSheet(){ S.sheet = null; renderSheet(); }
+function toggleLine(a, b){
+  const d = draft(); if (a > b) [a, b] = [b, a];
+  (S.history[S.cid] ||= []).push(d.lines.map(l => [...l]));
+  if (S.history[S.cid].length > 100) S.history[S.cid].shift();
+  const i = d.lines.findIndex(l => l[0] === a && l[1] === b);
+  if (i >= 0) d.lines.splice(i, 1);
+  else if (d.lines.length < MAX_LINES) d.lines.push([a, b]);
+  else toast(`선은 ${MAX_LINES}개까지 그을 수 있어요.`, true);
+  d.touched = true;
+}
+async function vote(author, cid){
+  if (!canAct()){ toast(whyNot(), true); return; }
+  if (author === S.myId) return;
+  const day = today(), had = myVote(day, cid);
+  try {
+    await writeMine(m => { const v = m.votes[day] ||= {}; if (v[cid] === author) delete v[cid]; else v[cid] = author; });
+    toast(had === author ? "별을 회수했어요" : had ? "별을 이 작품으로 옮겼어요" : "별을 줬어요");
+  } catch (err){ toast(writeError(err), true); }
+}
+
+/* sky input: tap a star, then another to connect; dragging between stars works too.
+   A sideways swipe that starts off a star moves to the next constellation. */
+function pt(ev){ const r = sky.getBoundingClientRect(); return { x: ev.clientX - r.left, y: ev.clientY - r.top }; }
+function hit(p, touch){
+  let best = null, bd = (touch ? 30 : 20) ** 2;
+  S.P.forEach((q, i) => { if (!q) return; const d = (q.x - p.x) ** 2 + (q.y - p.y) ** 2; if (d < bd){ bd = d; best = i; } });
+  return best;
+}
+const labelAt = p => S.labels.find(l => p.x >= l.x0 && p.x <= l.x1 && p.y >= l.y0 && p.y <= l.y1);
+let gest = null;
+sky.addEventListener("pointerdown", ev => {
+  if (anim) return;
+  const p = pt(ev), star = S.viewing ? null : hit(p, ev.pointerType !== "mouse");
+  S.down = star;
+  gest = { id: ev.pointerId, x0: p.x, y0: p.y, t0: performance.now(), star, swiping: false, base: { ...S.cam } };
+  try { sky.setPointerCapture(ev.pointerId); } catch {}
+});
+sky.addEventListener("pointermove", ev => {
+  if (!gest || ev.pointerId !== gest.id || gest.star != null || anim) return;
+  const p = pt(ev), dx = p.x - gest.x0, dy = p.y - gest.y0;
+  if (!gest.swiping && Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) * 1.3) gest.swiping = true;
+  if (gest.swiping){ S.cam = { ...gest.base, ox: gest.base.ox + dx / gest.base.s * .9 }; requestDraw(); }
+});
+sky.addEventListener("pointercancel", () => {
+  if (gest && gest.swiping) flyTo(S.cid, true);
+  gest = null; S.down = null;
+});
+sky.addEventListener("pointerup", ev => {
+  const g = gest; gest = null;
+  const start = S.down; S.down = null;
+  if (anim) return;
+  const p = pt(ev), touch = ev.pointerType !== "mouse";
+  if (g && g.swiping){
+    const dx = p.x - g.x0, v = dx / Math.max(1, performance.now() - g.t0);
+    if (Math.abs(dx) > 70 || Math.abs(v) > .5) stepConst(dx < 0 ? 1 : -1);
+    else flyTo(S.cid, true);
+    return;
+  }
+  if (S.viewing){ const l = labelAt(p); if (l) selectConst(l.cid); return; }
+  const i = hit(p, touch);
+  if (i == null){
+    const l = start == null && labelAt(p);
+    if (l){ selectConst(l.cid); return; }
+    if (S.selected != null){ S.selected = null; renderBottom(); requestDraw(); }
+    return;
+  }
+  if (start != null && i !== start){ toggleLine(start, i); S.selected = i; }
+  else if (S.selected != null && S.selected !== i){ toggleLine(S.selected, i); S.selected = i; }
+  else S.selected = S.selected === i ? null : i;
+  renderBottom(); requestDraw();
+});
+
+function renderSpin(){ const b = $("#spinBtn"); b.setAttribute("aria-pressed", String(S.spin)); b.textContent = S.spin ? "이동 연출 켜짐" : "이동 연출 꺼짐"; }
+$("#spinBtn").addEventListener("click", () => { S.spin = !S.spin; store("rs-spin", S.spin); renderSpin(); toast(S.spin ? "별자리를 바꿀 때 하늘이 움직여요" : "별자리가 바로 바뀌어요"); });
+$("#prevC").addEventListener("click", () => stepConst(-1));
+$("#nextC").addEventListener("click", () => stepConst(1));
+$("#cname").addEventListener("click", () => openSheet("pick"));
+$("#rankBtn").addEventListener("click", () => openSheet("rank"));
+$("#openForm").addEventListener("click", () => openSheet("form"));
+$("#ghostBtn").addEventListener("click", () => { S.ghost = !S.ghost; renderBottom(); requestDraw(); });
+$("#undoBtn").addEventListener("click", () => {
+  const h = S.history[S.cid]; if (!h || !h.length) return;
+  draft().lines = h.pop(); S.selected = null; renderBottom(); requestDraw();
+});
+$("#clearBtn").addEventListener("click", () => {
+  const d = draft(); if (!d.lines.length) return;
+  (S.history[S.cid] ||= []).push(d.lines.map(l => [...l]));
+  d.lines = []; d.touched = true; S.selected = null; renderBottom(); requestDraw();
+  toast("모두 지웠어요. 되돌리기로 살릴 수 있어요.");
+});
+function updateLens(){ $("#nameLen").textContent = `이름 ${$("#nameInput").value.length}/20`; $("#storyLen").textContent = `이야기 ${$("#storyInput").value.length}/140`; }
+$("#nameInput").addEventListener("input", e => { const d = draft(); d.name = e.target.value; d.touched = true; updateLens(); });
+$("#storyInput").addEventListener("input", e => { const d = draft(); d.story = e.target.value; d.touched = true; updateLens(); });
+$("#entryForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  if (!canAct()){ toast(whyNot(), true); return; }
+  const d = draft(), name = d.name.trim().slice(0, 20), story = d.story.trim().slice(0, 140);
+  if (d.lines.length < 2){ toast("선을 두 개 이상 이어 주세요.", true); return; }
+  if (!name){ toast("이름을 지어 주세요.", true); $("#nameInput").focus(); return; }
+  const btn = $("#submitBtn"); btn.disabled = true; btn.textContent = "올리는 중…";
+  const day = today(), cid = S.cid, lines = d.lines.map(l => [...l]), again = !!(S.mine && S.mine.entries[day + "_" + cid]);
+  try {
+    await writeMine(m => { const k = day + "_" + cid, prev = m.entries[k]; m.entries[k] = { c: cid, d: day, name, story, lines, t: prev && prev.t || Date.now() }; });
+    closeSheet(); showEntry(day, S.myId);
+    toast(again ? "고친 작품으로 바꿨어요" : "하늘에 올렸어요!");
+  } catch (err){ toast(writeError(err), true); renderSheet(); }
+});
+$("#vClose").addEventListener("click", () => { S.viewing = null; renderBottom(); requestDraw(); });
+$("#vVote").addEventListener("click", () => { if (S.viewing) vote(S.viewing.author, S.cid); });
+function stepEntry(dir){
+  if (!S.viewing) return;
+  const list = ranking(S.viewing.day, S.cid), i = list.findIndex(e => e.author === S.viewing.author), n = list[i + dir];
+  if (n) showEntry(S.viewing.day, n.author);
+}
+$("#vPrev").addEventListener("click", () => stepEntry(-1));
+$("#vNext").addEventListener("click", () => stepEntry(1));
+$("#vRemove").addEventListener("click", async () => {
+  const b = $("#vRemove");
+  if (b.dataset.confirm !== "1"){ b.dataset.confirm = "1"; b.textContent = "정말 내릴까요? 한 번 더 누르면 내려가요"; setTimeout(() => { b.dataset.confirm = ""; b.textContent = "내 작품 내리기"; }, 4000); return; }
+  b.dataset.confirm = ""; b.textContent = "내 작품 내리기";
+  const k = S.viewing.day + "_" + S.cid;
+  try { await writeMine(m => { delete m.entries[k]; }); S.viewing = null; renderBottom(); requestDraw(); toast("작품을 내렸어요. 그린 선은 그대로 남아 있어요."); }
+  catch (err){ toast(writeError(err), true); }
+});
+$("#sheetClose").addEventListener("click", closeSheet);
+$("#scrim").addEventListener("click", closeSheet);
+document.addEventListener("keydown", ev => {
+  if (ev.key === "Escape"){ if (S.sheet) closeSheet(); else if (S.viewing){ S.viewing = null; renderBottom(); requestDraw(); } return; }
+  if (S.sheet || /INPUT|TEXTAREA/.test(document.activeElement && document.activeElement.tagName || "")) return;
+  if (ev.key === "ArrowLeft") stepConst(-1);
+  if (ev.key === "ArrowRight") stepConst(1);
+});
+
+/* ---------- entrance: push the small star up; it grows and brightens until the sky opens ---------- */
+const I = { on: false, p: 0, drag: null, doneT: 0, resolve: null };
+const icv = $("#introSky"), ictx = icv.getContext("2d");
+function introGeo(){ const w = icv.clientWidth, h = icv.clientHeight; return { w, h, x: w / 2, y0: h - Math.max(130, h * .17), y1: Math.max(70, h * .1) }; }
+function drawIntro(now){
+  if (!I.on) return;
+  const G = introGeo(), { w, h } = G, dpr = Math.min(2, window.devicePixelRatio || 1);
+  if (icv.width !== Math.round(w * dpr) || icv.height !== Math.round(h * dpr)){ icv.width = Math.round(w * dpr); icv.height = Math.round(h * dpr); }
+  const x = ictx; x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, w, h);
+  if (!I.drag && !I.doneT && I.p > 0) I.p = Math.max(0, I.p - .05);   /* falls back if let go too early */
+  const p = I.p, sx = G.x, sy = G.y0 + (G.y1 - G.y0) * p + (p === 0 && !I.drag ? Math.sin(now / 600) * 4 : 0);
+
+  /* chevrons hinting upward while the star waits */
+  if (p < .15 && !I.doneT){
+    x.strokeStyle = COL.chalk; x.lineWidth = 1.6; x.lineCap = "round"; x.lineJoin = "round";
+    for (let i = 0; i < 3; i++){
+      const ph = ((now / 900) + i / 3) % 1, cy = sy - 34 - ph * 60;
+      x.globalAlpha = Math.sin(Math.PI * ph) * .7 * (1 - p / .15);
+      x.beginPath(); x.moveTo(sx - 8, cy + 5); x.lineTo(sx, cy - 3); x.lineTo(sx + 8, cy + 5); x.stroke();
+    }
+    x.globalAlpha = 1;
+  }
+
+  /* the star itself */
+  /* the star itself: a point of light with a soft halo that twinkles, the way a bright star looks to the eye */
+  if (p > 0){
+    const amb = x.createRadialGradient(sx, sy, 0, sx, sy, Math.hypot(w, h) * .8);
+    amb.addColorStop(0, `rgba(215,226,255,${.09 * p * p})`); amb.addColorStop(1, "rgba(215,226,255,0)");
+    x.fillStyle = amb; x.fillRect(0, 0, w, h);
+  }
+  const tw = 1 + .1 * Math.sin(now / 83) + .07 * Math.sin(now / 37 + 1.7) + .05 * Math.sin(now / 151 + .4);
+  const core = 1.1 + 2.6 * p, halo = (9 + 60 * Math.pow(p, 1.3)) * tw;
+  const g = x.createRadialGradient(sx, sy, 0, sx, sy, halo);
+  g.addColorStop(0, "rgba(255,255,255,1)");
+  g.addColorStop(.06, `rgba(236,242,255,${.55 + .35 * p})`);
+  g.addColorStop(.22, `rgba(205,218,255,${.12 + .2 * p})`);
+  g.addColorStop(1, "rgba(180,198,255,0)");
+  x.fillStyle = g; x.beginPath(); x.arc(sx, sy, halo, 0, 7); x.fill();
+  x.fillStyle = "#fff"; x.beginPath(); x.arc(sx, sy, core, 0, 7); x.fill();
+
+  /* once it arrives, its light floods the screen */
+  if (I.doneT){
+    const k = Math.min(1, (now - I.doneT) / 650), R = Math.hypot(w, h) * k * 1.1;
+    const b = x.createRadialGradient(sx, sy, 0, sx, sy, Math.max(1, R));
+    b.addColorStop(0, `rgba(255,252,240,${.85 * k})`); b.addColorStop(1, "rgba(255,252,240,0)");
+    x.fillStyle = b; x.fillRect(0, 0, w, h);
+  }
+  $("#introTitle").style.opacity = String(.18 + .82 * p);
+  $("#introHint").style.opacity = String(Math.max(0, 1 - p * 2.5));
+  requestAnimationFrame(drawIntro);
+}
+function openSky(){
+  if (I.doneT || !I.on) return;
+  I.doneT = performance.now(); I.p = 1; I.drag = null;
+  setTimeout(() => {
+    $("#intro").classList.add("gone");
+    setTimeout(() => { I.on = false; $("#intro").hidden = true; if (I.resolve) I.resolve(); }, 900);
+  }, 600);
+}
+function runIntro(){
+  I.on = true; $("#intro").hidden = false;
+  requestAnimationFrame(drawIntro);
+  return new Promise(r => { I.resolve = r; });
+}
+const ipt = ev => { const r = icv.getBoundingClientRect(); return { x: ev.clientX - r.left, y: ev.clientY - r.top }; };
+icv.addEventListener("pointerdown", ev => {
+  if (I.doneT) return;
+  const p = ipt(ev), G = introGeo();
+  if (p.y < G.h * .45) return;   /* start the push anywhere in the lower part of the screen */
+  I.drag = { y0: p.y, p0: I.p };
+  try { icv.setPointerCapture(ev.pointerId); } catch {}
+});
+icv.addEventListener("pointermove", ev => {
+  if (!I.drag) return;
+  const G = introGeo();
+  I.p = Math.max(0, Math.min(1, I.drag.p0 + (I.drag.y0 - ipt(ev).y) / (G.y0 - G.y1)));
+  if (I.p >= .97) openSky();
+});
+const endPush = () => { if (!I.drag) return; I.drag = null; if (I.p > .55) openSky(); };
+icv.addEventListener("pointerup", endPush);
+icv.addEventListener("pointercancel", endPush);
+$("#introOpen").addEventListener("click", openSky);
+
+/* clock */
+function tick(){
+  const now = Date.now(), next = (Math.floor((now + KST) / DAY) + 1) * DAY - KST, left = Math.max(0, next - now);
+  const h = Math.floor(left / 36e5), m = Math.floor(left / 6e4) % 60, s = Math.floor(left / 1e3) % 60;
+  $("#countdown").textContent = [h, m, s].map(n => String(n).padStart(2, "0")).join(":");
+  if (today() !== S.day){ S.day = today(); S.viewing = null; renderUI(); }
+}
+let rT;
+new ResizeObserver(() => { clearTimeout(rT); rT = setTimeout(() => { if (!anim){ S.cam = fit(S.cid); draw(); } }, 80); }).observe(sky);
+
+/* ---------- shared store ---------- */
+async function connect(){
+  if (!window.claude || typeof window.claude.use !== "function"){ S.dbChecked = true; renderUI(); return; }
+  const [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
+  S.user = user; S.dbChecked = true;
+  if (!db){ renderUI(); return; }
+  S.db = db;
+  if (user){ S.myId = await user.id(); S.canWrite = await user.can("data.write"); }
+  renderUI();
+  db.collection("players").limit(1000).onSnapshot(snap => {
+    const m = new Map();
+    for (const d of snap.docs) if (d.exists) m.set(d.id, cleanPlayer(d.data()));
+    S.players = m; S.mine = S.myId ? m.get(S.myId) || S.mine || null : null;
+    if (S.mine && S.myId) S.players.set(S.myId, S.mine);
+    S.loaded = true; renderUI();
+  }, () => { S.loaded = true; toast("작품 목록을 받아오지 못하고 있어요. 페이지를 새로 열어 주세요.", true); renderUI(); });
+}
+
+function start(data){
+  const drafts = data.drafts;
+  if (drafts && typeof drafts === "object"){
+    for (const c of DATA){ const d = drafts[c.id]; if (d && typeof d === "object") S.drafts[c.id] = { lines: cleanLines(d.lines, c.stars.length), name: str(d.name, 20), story: typeof d.story === "string" ? d.story.slice(0, 140) : "", touched: !!d.touched }; }
+  }
+  const cid = data.cid || load("rs-cid"); if (typeof cid === "string" && Object.hasOwn(BYID, cid)) S.cid = cid;
+  if (data.ghost) S.ghost = true;
+  S.spin = load("rs-spin") !== false; renderSpin();
+  tick(); setInterval(tick, 1000);
+  renderTop(); renderBottom();
+  S.cam = fit(S.cid); draw();
+  const skyLoaded = fetch("sky.json").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(d => { loadSky(d); if (!anim){ S.cam = fit(S.cid); draw(); } }).catch(() => {});
+  const entered = data.cid ? ($("#intro").hidden = true, Promise.resolve()) : runIntro();
+  Promise.all([skyLoaded, entered]).then(() => { if (!anim){ S.cam = fit(S.cid); startReveal(); } });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!anim){ S.cam = fit(S.cid); draw(); } });
+  connect();
+}
+if (window.claude && window.claude.hot && window.claude.hot.snapshot) window.claude.hot.snapshot(() => ({ drafts: S.drafts, cid: S.cid, ghost: S.ghost }));
+const hot = window.claude && window.claude.hot;
+hot && hot.ready ? hot.ready(start) : start((hot && hot.data) || {});
+})();
+</script>
