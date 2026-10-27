@@ -22,7 +22,9 @@ function wrap(x, text, maxW, maxLines){
    topic: the day's topic line when the entry was on the topic sky ("오늘의 주제 …", or a special night), else "";
    site: the address to print at the foot ("" for none), so a picture shared on its own still leads back */
 export async function entryCard(entry, c, author, topic, site = ""){
-  try { await Promise.all([document.fonts.load(`700 72px ${NAME_FONT}`), document.fonts.load(`32px ${UI_FONT}`)]); } catch {}
+  /* web fonts arrive in pieces by character range, so ask for the pieces these words need */
+  const words = [entry.name, entry.story, author, topic, site, c.title, "다시 그린 하늘 위에 새로 그었어요 나도 다시 그려 보기 0123456789."].join("");
+  try { await Promise.all([`700 76px ${NAME_FONT}`, `36px ${NAME_FONT}`, `32px ${UI_FONT}`].map(f => document.fonts.load(f, words))); } catch {}
   const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
   const x = cv.getContext("2d");
 
