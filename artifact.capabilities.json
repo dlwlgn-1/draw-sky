@@ -6,5 +6,6 @@
     ]
   },
   "user": { "scopes": ["profile"] },
-  "downloads": true
+  "downloads": true,
+  "room": {}
 }
