@@ -34,6 +34,8 @@ export async function renderBottom(){
     if (S.selected != null){
       const s = c.stars[S.selected];
       hint.append(el("b", null, `${s[0]} ${c.ab}${s[1] ? " " + s[1] : ""}`), document.createTextNode(` · ${s[4].toFixed(1)}등급 · 적경 ${fmtRA(s[2])} 적위 ${fmtDec(s[3])}`));
+    } else if (S.ghost){
+      hint.append(el("b", null, "원래 그림 · "), document.createTextNode(c.myth));
     } else if (!d.lines.length){
       const tp = topicOf(today());
       hint.textContent = tp.cid === S.cid ? `주제 ‘${tp.theme}’ — 떠오르는 모양대로 별을 이어 보세요` : "밝게 빛나는 별 두 개를 차례로 눌러 선을 이어 보세요";
@@ -62,6 +64,7 @@ export async function renderBottom(){
   $("#vPrev").disabled = i <= 0; $("#vNext").disabled = i < 0 || i >= list.length - 1;
   $("#vPrev").hidden = $("#vNext").hidden = list.length < 2;
   $("#vRemove").hidden = !(v.author === S.myId && isToday);
+  $("#vSave").hidden = !(S.backend && S.backend.saveFile);
 }
 function fillStar(b, e, cid, isToday){
   const mine = e.author === S.myId, voted = isToday && myVote(today(), cid) === e.author;

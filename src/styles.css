@@ -95,6 +95,7 @@ button:disabled{cursor:default}
 .vday{font-size:.8rem;color:var(--sub)}
 .x{margin-left:auto;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--sub);background:rgba(255,255,255,.07)}
 .x svg{width:16px;height:16px}
+.x + .x{margin-left:6px}
 .vcard h2{font-size:1.5rem;margin-top:8px;overflow-wrap:anywhere}
 .vby{font-size:.82rem;color:var(--sub);margin-top:2px}
 .vby b{color:var(--text)}

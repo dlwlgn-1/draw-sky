@@ -52,9 +52,10 @@ function paintDSO(x, V, w, h, k){
   }
   x.restore();
 }
-/* stars, binned by brightness and colour so each frame fills a few dozen paths */
-function paintField(x, V, w, h, unit){
+/* stars, binned by brightness and colour so each frame fills a few dozen paths; fast leaves out the faintest */
+function paintField(x, V, w, h, unit, fast){
   for (const b of SKY.buckets){
+    if (fast && b.faint) continue;
     const r = b.r * unit;
     x.beginPath();
     for (const o of b.list){
@@ -77,17 +78,38 @@ function paintField(x, V, w, h, unit){
   }
 }
 
-export function draw(){
-  const w = sky.clientWidth, h = sky.clientHeight; if (!w || !h || !S.cam) return 1;
-  const dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(w * dpr), H = Math.round(h * dpr);
-  if (sky.width !== W || sky.height !== H){ sky.width = W; sky.height = H; }
-  const x = ctx; x.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const V = camera(S.cam), unit = Math.min(1.3, Math.max(.85, Math.min(w, h) / 420));
-
+/* everything behind the chosen constellation */
+export function paintBackdrop(x, V, w, h, unit, fast){
   paintBackground(x, w, h, V.cy, 1);
   paintMilky(x, V, w, h, 1);
   paintDSO(x, V, w, h, 1);
-  paintField(x, V, w, h, unit);
+  paintField(x, V, w, h, unit, fast);
+}
+
+/* the backdrop only changes when the camera moves, so it is kept in its own canvas between frames */
+const base = document.createElement("canvas"), bctx = base.getContext("2d");
+let baseKey = "";
+function backdrop(V, w, h, dpr, unit, fast){
+  const key = [w, h, dpr, V.ra, V.sd, V.s, V.ox, V.oy, V.cy, SKY.ready, fast].join();
+  if (key !== baseKey){
+    baseKey = key;
+    const W = Math.round(w * dpr), H = Math.round(h * dpr);
+    if (base.width !== W || base.height !== H){ base.width = W; base.height = H; }
+    bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    paintBackdrop(bctx, V, w, h, unit, fast);
+  }
+  return base;
+}
+
+/* fast: the camera is moving, so the faintest stars are left out for smoother frames.
+   Returns how far the glow-in after landing has got (0–1). */
+export function draw(fast = false){
+  const w = sky.clientWidth, h = sky.clientHeight; if (!w || !h || !S.cam) return 1;
+  const dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(w * dpr), H = Math.round(h * dpr);
+  if (sky.width !== W || sky.height !== H){ sky.width = W; sky.height = H; }
+  const x = ctx, V = camera(S.cam), unit = Math.min(1.3, Math.max(.85, Math.min(w, h) / 420));
+  x.setTransform(1, 0, 0, 1, 0, 0); x.drawImage(backdrop(V, w, h, dpr, unit, fast), 0, 0);
+  x.setTransform(dpr, 0, 0, dpr, 0, 0);
   const rv = S.reveal ? Math.min(1, (performance.now() - S.reveal) / 1000) : 1, rve = rv * rv * (3 - 2 * rv);
 
   /* other constellations: their stars, and their names as places to fly to */

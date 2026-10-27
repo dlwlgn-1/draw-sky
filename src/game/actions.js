@@ -9,6 +9,8 @@ import { writeMine, writeError } from "./store.js";
 import { flyTo, requestDraw } from "../sky/motion.js";
 import { renderTop, renderBottom } from "../ui/panels.js";
 import { toast } from "../ui/dom.js";
+import { entryCard } from "../sky/card.js";
+import { names } from "./store.js";
 
 /* join stars a and b, or remove the line if they are already joined */
 export function toggleLine(a, b){
@@ -78,6 +80,22 @@ export async function postEntry(name, story){
   });
   showEntry(day, S.myId);
   return again;
+}
+
+/* save the entry being viewed as a picture */
+export async function saveEntryImage(){
+  const v = S.viewing && rank(S.viewing.day, S.cid).find(e => e.author === S.viewing.author);
+  if (!v || !S.backend || !S.backend.saveFile) return;
+  const tp = topicOf(v.d), nm = await names([v.author]);
+  const author = v.author === S.myId ? "내 작품" : nm[v.author];
+  try {
+    const blob = await entryCard(v, BYID[v.c], author, tp.cid === v.c ? tp.theme : "");
+    const safe = v.name.replace(/[\\/:*?"<>|]/g, "").trim() || "별자리";
+    await S.backend.saveFile(`${safe}.png`, blob);
+    toast("이미지로 저장했어요");
+  } catch (err){
+    if (!err || err.code !== "declined") toast("이미지를 저장하지 못했어요.", true);
+  }
 }
 
 export async function removeEntry(){

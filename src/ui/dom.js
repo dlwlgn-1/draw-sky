@@ -12,6 +12,7 @@ export function el(tag, cls, text){
 const css = getComputedStyle(document.documentElement), T = k => css.getPropertyValue(k).trim();
 export const COL = { text: T("--text"), chalk: T("--chalk"), sub: T("--sub"), dim: T("--dim") };
 export const UI_FONT = T("--ui");
+export const NAME_FONT = T("--name");
 export const reduceMotion = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
 
 export const STAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m12 2.8 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.6l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg>';

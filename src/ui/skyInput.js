@@ -29,7 +29,7 @@ export function bindSkyInput(){
     if (!gest || ev.pointerId !== gest.id || gest.star != null || isMoving()) return;
     const p = pt(ev), dx = p.x - gest.x0, dy = p.y - gest.y0;
     if (!gest.swiping && Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) * 1.3) gest.swiping = true;
-    if (gest.swiping){ S.cam = { ...gest.base, ox: gest.base.ox + dx / gest.base.s * .9 }; requestDraw(); }
+    if (gest.swiping){ S.cam = { ...gest.base, ox: gest.base.ox + dx / gest.base.s * .9 }; requestDraw(true); }
   });
   sky.addEventListener("pointercancel", () => {
     if (gest && gest.swiping) flyTo(S.cid, true);

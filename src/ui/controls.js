@@ -2,7 +2,7 @@
 import { S, draft, canAct, whyNot } from "../game/state.js";
 import { NAME_MAX, STORY_MAX } from "../game/rules.js";
 import { writeError } from "../game/store.js";
-import { selectConst, stepConst, undoLine, clearLines, closeEntry, stepEntry, vote, postEntry, removeEntry } from "../game/actions.js";
+import { selectConst, stepConst, undoLine, clearLines, closeEntry, stepEntry, vote, postEntry, removeEntry, saveEntryImage } from "../game/actions.js";
 import { requestDraw } from "../sky/motion.js";
 import { renderBottom, renderSheet, openSheet, closeSheet, renderSpin, updateLens } from "./panels.js";
 import { $, toast, store } from "./dom.js";
@@ -46,6 +46,7 @@ export function bindControls(){
   });
 
   $("#vClose").addEventListener("click", closeEntry);
+  $("#vSave").addEventListener("click", saveEntryImage);
   $("#vVote").addEventListener("click", () => { if (S.viewing) vote(S.viewing.author, S.cid); });
   $("#vPrev").addEventListener("click", () => stepEntry(-1));
   $("#vNext").addEventListener("click", () => stepEntry(1));

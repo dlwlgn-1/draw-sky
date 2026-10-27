@@ -1,22 +1,20 @@
-/* Talking to the artifact's shared database and identity services (window.claude). */
+/* The game's link to its backend: loading everyone's documents, writing my own, and names. */
 import { S } from "./state.js";
 import { cleanPlayer, prune } from "./rules.js";
 import { emptyStats } from "./badges.js";
 import { checkProgress } from "./progress.js";
+import { openClaudeBackend } from "../backend/claude.js";
 import { renderUI } from "../ui/panels.js";
 import { toast } from "../ui/dom.js";
 
 export async function connect(){
-  if (!window.claude || typeof window.claude.use !== "function"){ S.dbChecked = true; renderUI(); return; }
-  const [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
-  S.user = user; S.dbChecked = true;
-  if (!db){ renderUI(); return; }
-  S.db = db;
-  if (user){ S.myId = await user.id(); S.canWrite = await user.can("data.write"); }
+  const be = await openClaudeBackend().catch(() => null);
+  S.backend = be; S.dbChecked = true;
+  if (!be || !be.hasStore){ renderUI(); return; }
+  S.db = be; S.myId = be.myId; S.canWrite = be.canWrite;
   renderUI();
-  db.collection("players").limit(1000).onSnapshot(snap => {
-    const m = new Map();
-    for (const d of snap.docs) if (d.exists) m.set(d.id, cleanPlayer(d.data()));
+  be.watchPlayers(docs => {
+    const m = new Map(docs.map(([id, d]) => [id, cleanPlayer(d)]));
     S.players = m; S.mine = S.myId ? m.get(S.myId) || S.mine || null : null;
     if (S.mine && S.myId) S.players.set(S.myId, S.mine);
     S.loaded = true; renderUI(); checkProgress();
@@ -28,7 +26,7 @@ export function writeMine(mutate){
   const run = async () => {
     const base = JSON.parse(JSON.stringify(S.mine || { entries: {}, votes: {}, stats: emptyStats() }));
     mutate(base); prune(base);
-    await S.db.doc("players/" + S.myId).set(base);
+    await S.db.savePlayer(S.myId, base);
     S.mine = cleanPlayer(base); S.players.set(S.myId, S.mine); renderUI();
   };
   const p = S.chain.then(run); S.chain = p.catch(() => {}); return p;
@@ -45,8 +43,8 @@ export function writeError(err){
 
 /* display names for author ids, as this viewer sees them */
 export async function names(ids){
-  const out = {}; let ps = {};
-  if (S.user && ids.length){ try { ps = await S.user.profiles(ids); } catch {} }
-  for (const id of ids) out[id] = id === S.myId ? "나" : (ps[id] && ps[id].name) || "익명의 관측자";
+  const ps = S.backend && ids.length ? await S.backend.names(ids) : {};
+  const out = {};
+  for (const id of ids) out[id] = id === S.myId ? "나" : ps[id] || "익명의 관측자";
   return out;
 }

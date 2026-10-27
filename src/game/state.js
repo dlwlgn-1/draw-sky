@@ -6,13 +6,14 @@ import { today } from "./time.js";
 export const S = {
   cid: "ori",            // chosen constellation
   viewing: null,         // { day, author } while looking at someone's entry on the big sky
-  sheet: null,           // "form" | "rank" | "pick"
+  sheet: null,           // "form" | "rank" | "pick" | "badges"
   ghost: false,          // show the traditional figure
   selected: null, down: null, noRefit: false,
   spin: true,            // move the sky between constellations (off: switch at once)
   drafts: {}, history: {},
   players: new Map(), mine: null, loaded: false, dbChecked: false,
-  db: null, user: null, myId: null, canWrite: null, chain: Promise.resolve(),
+  backend: null,         // see backend/claude.js; db is the same object once a shared store is there
+  db: null, myId: null, canWrite: null, chain: Promise.resolve(),
   day: today(), cam: null, reveal: 0, P: [], R: [], labels: []
 };
 

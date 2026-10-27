@@ -5,10 +5,16 @@ import { fit } from "./projection.js";
 import { draw } from "./render.js";
 import { reduceMotion } from "../ui/dom.js";
 
-let anim = null, rq = 0;
+let anim = null, rq = 0, rqFast = false;
 export const isMoving = () => !!anim;
 
-export function requestDraw(){ if (rq || anim) return; rq = requestAnimationFrame(() => { rq = 0; draw(); }); }
+/* one draw per frame at most; fast (faint stars left out) only if every request this frame asked for it */
+export function requestDraw(fast = false){
+  if (anim) return;
+  rqFast = rq ? rqFast && fast : fast;
+  if (rq) return;
+  rq = requestAnimationFrame(() => { rq = 0; draw(rqFast); });
+}
 
 /* the chosen constellation's lines and glow fade in over a second */
 export function startReveal(){
@@ -38,7 +44,7 @@ function step(now){
     s: geo(f.s, o.s, e) * (1 - a.bump * Math.sin(Math.PI * t)),
     ox: lerp(f.ox, o.ox, e), oy: lerp(f.oy, o.oy, e), cy: lerp(f.cy, o.cy, e)
   };
-  draw();
+  draw(t < 1);
   if (t < 1) requestAnimationFrame(step);
   else { anim = null; S.cam = { ...o }; if (a.quick) draw(); else startReveal(); }
 }

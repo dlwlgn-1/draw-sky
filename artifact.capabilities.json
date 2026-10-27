@@ -1,0 +1,10 @@
+{
+  "db": {
+    "rules": [
+      { "path": "players", "read": "view", "write": "owner" },
+      { "path": "players/{self}", "write": "interact" }
+    ]
+  },
+  "user": { "scopes": ["profile"] },
+  "downloads": true
+}
