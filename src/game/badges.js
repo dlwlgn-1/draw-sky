@@ -7,11 +7,19 @@
                                                                            redoing a post or a vote never counts twice
    Each player writes only their own record, so badges are a personal log rather than a contest result. */
 
+import { NAMED, REGIONS } from "../data/constellations.js";
+
+const NAMED_IDS = NAMED.map(c => c.id), REGION_IDS = REGIONS.map(c => c.id);
+const drewNamed = s => NAMED_IDS.filter(id => s.drawn[id]).length;
+const drewRegions = s => REGION_IDS.filter(id => s.drawn[id]).length;
+export { drewNamed, drewRegions };
+
 export const BADGES = [
   { id: "first",    name: "첫 별자리",      how: "작품을 처음 올리기",                 test: s => s.posts >= 1 },
   { id: "topic",    name: "주제 도전",      how: "오늘의 주제로 작품 올리기",           test: s => s.topicPosts >= 1 },
   { id: "topic10",  name: "주제 장인",      how: "오늘의 주제로 10번 올리기",           test: s => s.topicPosts >= 10 },
-  { id: "all8",     name: "하늘 일주",      how: "8개 별자리를 모두 다시 그리기",       test: s => Object.keys(s.drawn).length >= 8 },
+  { id: "all8",     name: "하늘 일주",      how: "이름 있는 별자리 8개를 모두 다시 그리기", test: s => drewNamed(s) >= 8 },
+  { id: "pioneer",  name: "개척자",         how: "이름 없는 하늘에 처음 이름 붙이기",   test: s => drewRegions(s) >= 1 },
   { id: "streak3",  name: "사흘 연속",      how: "3일 연속 작품 올리기",               test: s => s.best >= 3 },
   { id: "streak7",  name: "일주일 개근",    how: "7일 연속 작품 올리기",               test: s => s.best >= 7 },
   { id: "star1",    name: "첫 별",          how: "다른 사람에게 별 받기",               test: s => s.maxStars >= 1 },
@@ -82,14 +90,19 @@ export function recordVote(s, day, cid, nowVoted){
 }
 
 /* what the rankings say about my entries: most stars on one entry, and days I finished first.
-   rankOf(day, cid) returns that day's ranking; a day counts as won only once it has closed. */
-export function observe(s, myId, entries, rankOf, today){
+   rankOf(day, cid) returns that day's ranking; a day counts as won only once it has closed.
+   hall (optional): my hall of fame, which gets a lasting copy of each winning entry. */
+export function observe(s, myId, entries, rankOf, today, hall){
   let changed = false;
   for (const e of Object.values(entries)){
     const mine = rankOf(e.d, e.c).find(x => x.author === myId); if (!mine) continue;
     if (mine.votes > s.maxStars){ s.maxStars = mine.votes; changed = true; }
     const key = e.d + "_" + e.c;
-    if (e.d < today && mine.rank === 1 && mine.votes > 0 && !s.wins[key]){ s.wins[key] = 1; changed = true; }
+    if (e.d < today && mine.rank === 1 && mine.votes > 0){
+      if (!s.wins[key]){ s.wins[key] = 1; changed = true; }
+      const h = hall && hall[key];
+      if (hall && (!h || h.votes !== mine.votes)){ hall[key] = { c: e.c, d: e.d, name: e.name, story: e.story, lines: e.lines, votes: mine.votes, t: e.t }; changed = true; }
+    }
   }
   return changed;
 }

@@ -9,13 +9,15 @@
      watchPlayer(id, onDoc, onErr) onDoc(rawDoc or null) for one document, mine, so it is never missed
      savePlayer(id, doc)         replace my own document
      names(ids)                  { id: display name or "" }
-     saveFile(filename, blob)    offer a file to the player, or null when this view cannot */
+     saveFile(filename, blob)    offer a file to the player, or null when this view cannot
+     setPresence(state)          share a small object about me with everyone here now (no-op without a room)
+     watchPeers(onPeers)         onPeers([{ kind, isMe, by, peer, presence }, …]) when the room changes, or null */
 export async function openClaudeBackend(){
   const c = window.claude;
   if (!c || typeof c.use !== "function") return null;
   /* each part may be missing in a given view; one missing part must not switch off the others */
   const safe = f => Promise.resolve().then(f).catch(() => null);
-  const [db, user, downloads] = await Promise.all(["db", "user", "downloads"].map(n => safe(() => c.use(n))));
+  const [db, user, downloads, room] = await Promise.all(["db", "user", "downloads", "room"].map(n => safe(() => c.use(n))));
   return {
     myId: user ? await safe(() => user.id()) : null,
     canWrite: user ? await safe(() => user.can("data.write")) : null,
@@ -32,6 +34,8 @@ export async function openClaudeBackend(){
       try { const ps = await user.profiles(ids); return Object.fromEntries(ids.map(id => [id, (ps[id] && ps[id].name) || ""])); }
       catch { return {}; }
     },
-    saveFile: downloads ? (filename, blob) => downloads.save({ filename, data: blob }) : null
+    saveFile: downloads ? (filename, blob) => downloads.save({ filename, data: blob }) : null,
+    setPresence: room ? state => { room.presence(state).catch(() => {}); } : () => {},
+    watchPeers: room ? onPeers => room.onPeers(ch => onPeers(ch.peers), () => {}) : null
   };
 }

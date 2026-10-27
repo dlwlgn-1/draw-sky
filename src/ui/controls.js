@@ -18,6 +18,7 @@ export function bindControls(){
   $("#nextC").addEventListener("click", () => stepConst(1));
   $("#cname").addEventListener("click", () => openSheet("pick"));
   $("#badgeBtn").addEventListener("click", () => openSheet("badges"));
+  document.querySelectorAll(".hall-link").forEach(b => b.addEventListener("click", () => openSheet("hall")));
   $("#topicBtn").addEventListener("click", () => {
     const tp = topicOf(today());
     if (tp.cid !== S.cid) selectConst(tp.cid);

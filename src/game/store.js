@@ -3,6 +3,7 @@ import { S } from "./state.js";
 import { cleanPlayer, prune } from "./rules.js";
 import { emptyStats } from "./badges.js";
 import { checkProgress } from "./progress.js";
+import { peersBySky, sharePresence } from "./presence.js";
 import { openClaudeBackend } from "../backend/claude.js";
 import { renderUI } from "../ui/panels.js";
 import { toast } from "../ui/dom.js";
@@ -10,6 +11,10 @@ import { toast } from "../ui/dom.js";
 export async function connect(){
   const be = await openClaudeBackend().catch(() => null);
   S.backend = be; S.dbChecked = true;
+  if (be && be.watchPeers){
+    be.watchPeers(list => { S.peers = peersBySky(list); renderUI(); });
+    sharePresence();
+  }
   if (!be || !be.hasStore){ renderUI(); return; }
   S.db = be; S.myId = be.myId; S.canWrite = be.canWrite;
   renderUI();

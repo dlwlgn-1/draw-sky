@@ -8,6 +8,7 @@
   --sticker:#ffcf3f;    /* vote stars */
   --text:#eef0f6; --sub:#a0a8bf; --dim:#677190;
   --danger:#ff9a85;
+  --live:#8ef0b0;       /* someone is here right now */
   --name:"Gowun Batang","Nanum Myeongjo",serif;
   --ui:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   color-scheme:dark;
@@ -62,6 +63,10 @@ button:disabled{cursor:default}
 .cname .ko{font-family:var(--name);font-weight:700;font-size:1.75rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .cname .meta{font-size:.8rem;color:var(--sub);display:flex;align-items:center;gap:4px;white-space:nowrap}
 .cname .meta svg{width:12px;height:12px}
+.live{display:inline-flex;align-items:center;gap:5px;color:var(--live)}
+.live::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--live);box-shadow:0 0 6px var(--live);animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{50%{opacity:.3}}
+.livetag{color:var(--live)}
 .topic{pointer-events:auto;display:flex;align-items:center;justify-content:center;gap:8px;margin:8px auto 0;max-width:100%;box-sizing:border-box;background:rgba(247,239,198,.1);border:1px solid rgba(247,239,198,.22);border-radius:999px;padding:5px 14px;color:var(--chalk);font-size:.86rem}
 .topic .tl{font-size:.72rem;color:var(--sub);white-space:nowrap}
 .topic .tt{font-family:var(--name);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
@@ -141,6 +146,15 @@ button:disabled{cursor:default}
 .empty b{display:block;font-family:var(--name);font-weight:700;font-size:1.1rem;color:var(--text);margin-bottom:4px}
 .yday{margin-top:22px}
 .yday h3{font-size:.95rem;color:var(--sub);font-family:var(--ui);font-weight:400}
+.yhead{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.hall-link{font-size:.8rem;color:var(--sticker);white-space:nowrap}
+.hall-link.block{display:block;width:100%;text-align:left;background:rgba(255,207,63,.08);border:1px solid rgba(255,207,63,.25);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:.86rem}
+.sect{font-size:.76rem;color:var(--sub);padding:16px 0 6px;border-bottom:1px solid var(--line)}
+.hday{font-family:var(--ui);font-weight:400;font-size:.8rem;color:var(--sub);margin:16px 0 0}
+.hrow{display:grid;grid-template-columns:72px minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.hrow:last-child{border-bottom:0}
+.hrow canvas{width:72px;height:54px;border-radius:8px;display:block}
+.hvotes{font-size:.82rem;color:var(--sticker);white-space:nowrap}
 .yday .none{font-size:.84rem;color:var(--dim);padding:8px 0}
 
 .prow{display:grid;grid-template-columns:72px minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
@@ -196,4 +210,4 @@ button:disabled{cursor:default}
 .award b{font-family:var(--name);font-weight:700;font-size:1.1rem}
 .award .s{font-size:.74rem;color:var(--sub)}
 @keyframes pop{from{transform:translateX(-50%) scale(.85);opacity:0}to{transform:translateX(-50%) scale(1);opacity:1}}
-@media (prefers-reduced-motion:reduce){.sheet,.award{animation:none}}
+@media (prefers-reduced-motion:reduce){.sheet,.award,.live::before{animation:none}}

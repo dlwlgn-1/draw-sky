@@ -53,7 +53,7 @@ export async function entryCard(entry, c, author, theme){
   x.fillStyle = COL.sub; x.font = `30px ${UI_FONT}`; x.textAlign = "left"; x.fillText("다시 그린 하늘", L, 104);
   x.textAlign = "right"; x.fillText(entry.d.replace(/-/g, "."), W - L, 104);
   x.textAlign = "left";
-  x.fillStyle = COL.chalk; x.font = `30px ${UI_FONT}`; x.fillText(theme ? `${c.ko}자리 · 오늘의 주제 ${theme}` : `${c.ko}자리를 다시 그렸어요`, L, H - 380);
+  x.fillStyle = COL.chalk; x.font = `30px ${UI_FONT}`; x.fillText(theme ? `${c.title} · 오늘의 주제 ${theme}` : `${c.title} 위에 새로 그었어요`, L, H - 380);
   x.fillStyle = COL.text; x.font = `700 76px ${NAME_FONT}`;
   wrap(x, entry.name, W - 2 * L, 1).forEach((t, i) => x.fillText(t, L, H - 285 + i * 84));
   x.fillStyle = COL.sub; x.font = `32px ${UI_FONT}`; x.fillText(author, L, H - 225);

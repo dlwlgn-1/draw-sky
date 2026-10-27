@@ -33,7 +33,7 @@ function start(data){
   if (data.ghost) S.ghost = true;
   S.spin = load("rs-spin") !== false; renderSpin();
 
-  bindControls(); bindSkyInput(); bindIntro({ theme: tp.theme, place: `${BYID[tp.cid].ko}자리` });
+  bindControls(); bindSkyInput(); bindIntro({ theme: tp.theme, place: BYID[tp.cid].title });
   startClock();
   renderTop(); renderBottom();
   S.cam = fit(S.cid); draw();

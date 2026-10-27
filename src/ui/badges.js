@@ -1,6 +1,6 @@
 /* Badges on screen: the medal pictures, the "내 뱃지" sheet, and the pop-up when one is earned. */
 import { S, canAct, whyNot } from "../game/state.js";
-import { BADGES, emptyStats } from "../game/badges.js";
+import { BADGES, emptyStats, drewNamed, drewRegions } from "../game/badges.js";
 import { shortDay, today, yesterday } from "../game/time.js";
 import { rng } from "../sky/math.js";
 import { $, el } from "./dom.js";
@@ -30,7 +30,7 @@ export function renderBadgeSheet(){
   for (const [label, value, sub] of [
     /* a streak still counts if the last post was today or yesterday */
     ["연속 참여", `${s.lastDay === today() || s.lastDay === yesterday() ? s.streak : 0}일`, `최고 ${s.best}일`],
-    ["올린 작품", `${s.posts}개`, `별자리 ${Object.keys(s.drawn).length} / 8`],
+    ["올린 작품", `${s.posts}개`, `별자리 ${drewNamed(s)} / 8 · 이름 없는 하늘 ${drewRegions(s)}`],
     ["1위로 마친 날", `${Object.keys(s.wins).length}번`, `한 작품 최다 별 ${s.maxStars}개`],
     ["나눠 준 별", `${s.given}개`, `주제 도전 ${s.topicPosts}번`]
   ]){

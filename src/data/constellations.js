@@ -1,8 +1,10 @@
 /* The eight playable constellations: their stars, their traditional figures and the story behind each.
    Each star: [Bayer key, 이름, 적경(h), 적위(°), 등급]. Lines join Bayer keys. */
 import { D2R, sph, vec, norm } from "../sky/math.js";
+import { REGIONS } from "./regions.js";
+export { REGIONS };
 
-export const DATA = [
+export const NAMED = [
   {id:"ori", ko:"오리온", la:"Orion", ab:"Ori", myth:"그리스 신화의 사냥꾼 오리온. 나란히 선 별 셋이 허리띠예요.", stars:[
     ["α","베텔게우스",5.919,7.407,0.50],["β","리겔",5.242,-8.202,0.13],["γ","벨라트릭스",5.419,6.350,1.64],
     ["δ","민타카",5.533,-0.299,2.23],["ε","알닐람",5.603,-1.202,1.69],["ζ","알니탁",5.679,-1.943,1.77],
@@ -64,6 +66,8 @@ export const DATA = [
     lines:"α-ε α-ζ¹ ζ¹-β β-γ γ-δ² δ²-ζ¹"}
 ];
 
+/* every sky that can be played: the named constellations, then the unnamed areas */
+export const DATA = [...NAMED, ...REGIONS];
 export const BYID = Object.create(null);
 
 for (const c of DATA){
@@ -72,7 +76,9 @@ for (const c of DATA){
   const v = norm(c.sv.reduce((a, o) => { const u = vec(o); return [a[0] + u[0], a[1] + u[1], a[2] + u[2]]; }, [0, 0, 0]));
   c.cvec = v; c.cra = Math.atan2(v[1], v[0]); c.cdec = Math.asin(v[2]); c.cpt = { ra: c.cra, sd: Math.sin(c.cdec), cd: Math.cos(c.cdec) };
   const k2i = Object.fromEntries(c.stars.map((s, i) => [s[0], i]));
-  c.orig = c.lines.split(" ").map(p => p.split("-").map(k => k2i[k]));
+  c.orig = c.lines ? c.lines.split(" ").map(p => p.split("-").map(k => k2i[k])) : [];   // unnamed areas have no traditional figure
+  c.title = c.region ? c.ko : `${c.ko}자리`;
+  c.starName = i => c.region ? `별 ${c.stars[i][0]}` : c.stars[i][1] || `${c.stars[i][0]} ${c.ab}`;   // what a star is called on screen
   /* flat projection for the small thumbnails in lists */
   const ref = c.stars[0][2], dec0 = c.stars.reduce((a, s) => a + s[3], 0) / c.stars.length, cosd = Math.cos(dec0 * D2R);
   c.pts = c.stars.map(s => ({ x: -(((s[2] - ref + 36) % 24) - 12) * 15 * cosd, y: -s[3] }));

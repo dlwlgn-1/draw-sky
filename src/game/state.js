@@ -6,7 +6,8 @@ import { today } from "./time.js";
 export const S = {
   cid: "ori",            // chosen constellation
   viewing: null,         // { day, author } while looking at someone's entry on the big sky
-  sheet: null,           // "form" | "rank" | "pick" | "badges"
+  sheet: null,           // "form" | "rank" | "pick" | "badges" | "hall"
+  peers: {},             // who else is on each sky right now: { cid: { here, drawing } }
   ghost: false,          // show the traditional figure
   selected: null, down: null, noRefit: false,
   posting: false, saving: false,   // a post or an image save is under way
@@ -22,9 +23,11 @@ export const cur = () => BYID[S.cid];
 export const draft = (cid = S.cid) => S.drafts[cid] ||= { lines: [], name: "", story: "", touched: false };
 export const rank = (day, cid) => ranking(S.players, day, cid);
 
+/* the entry on the big sky: from the day's ranking, or for an older hall of fame entry the copy it came with */
 export function viewedEntry(){
   if (!S.viewing) return null;
-  return rank(S.viewing.day, S.cid).find(e => e.author === S.viewing.author) || null;
+  const live = rank(S.viewing.day, S.cid).find(e => e.author === S.viewing.author);
+  return live || (S.viewing.entry ? { ...S.viewing.entry, author: S.viewing.author, rank: 1 } : null);
 }
 
 export const myVote = (day, cid) => S.mine && S.mine.votes[day] ? S.mine.votes[day][cid] || null : null;

@@ -1,5 +1,5 @@
 /* What a player can do: draw lines, move between constellations, look at entries, vote, post, remove. */
-import { S, draft, rank, canAct, whyNot } from "./state.js";
+import { S, draft, rank, canAct, whyNot, viewedEntry } from "./state.js";
 import { MAX_LINES, toggleVote } from "./rules.js";
 import { recordPost, recordVote, stamp } from "./badges.js";
 import { topicOf } from "./topic.js";
@@ -87,7 +87,7 @@ export async function postEntry(name, story){
 
 /* save the entry being viewed as a picture; one save at a time */
 export async function saveEntryImage(){
-  const v = S.viewing && rank(S.viewing.day, S.cid).find(e => e.author === S.viewing.author);
+  const v = viewedEntry();
   if (!v || !S.backend || !S.backend.saveFile || S.saving) return;
   S.saving = true; renderBottom();
   try {

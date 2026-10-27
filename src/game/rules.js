@@ -4,6 +4,8 @@
      entries: { "<day>_<constellation>": { c, d, name, story, lines: [[a, b], …], t } }
      votes:   { "<day>": { "<constellation>": "<author id>" } }
      stats:   the lasting record behind badges (see badges.js); never pruned
+     hall:    { "<day>_<constellation>": { c, d, name, story, lines, votes, t } } — my days in first place
+              (see hall.js); never pruned
    Everything read from the store is someone else's input, so it is cleaned before use. */
 import { BYID } from "../data/constellations.js";
 import { DAY, dayOf } from "./time.js";
@@ -31,15 +33,22 @@ export function cleanLines(v, n){
   return out;
 }
 
+/* one entry stored under key "<day>_<constellation>", or null if it does not hold together */
+function cleanEntry(k, e){
+  if (!e || typeof e !== "object") return null;
+  const c = typeof e.c === "string" && Object.hasOwn(BYID, e.c) ? BYID[e.c] : null;
+  if (!c || typeof e.d !== "string" || !DAY_RE.test(e.d) || k !== e.d + "_" + e.c) return null;
+  const lines = cleanLines(e.lines, c.stars.length); if (!lines.length) return null;
+  return { c: e.c, d: e.d, name: str(e.name, NAME_MAX) || "이름 없는 별자리", story: str(e.story, STORY_MAX), lines, t: Number.isFinite(e.t) ? e.t : 0 };
+}
+
 export function cleanPlayer(d){
-  const out = { entries: {}, votes: {}, stats: cleanStats(d && d.stats, CIDS) };
+  const out = { entries: {}, votes: {}, stats: cleanStats(d && d.stats, CIDS), hall: {} };
   const E = d && typeof d.entries === "object" && d.entries || {};
-  for (const k of Object.keys(E)){
-    const e = E[k]; if (!e || typeof e !== "object") continue;
-    const c = typeof e.c === "string" && Object.hasOwn(BYID, e.c) ? BYID[e.c] : null;
-    if (!c || typeof e.d !== "string" || !DAY_RE.test(e.d) || k !== e.d + "_" + e.c) continue;
-    const lines = cleanLines(e.lines, c.stars.length); if (!lines.length) continue;
-    out.entries[k] = { c: e.c, d: e.d, name: str(e.name, NAME_MAX) || "이름 없는 별자리", story: str(e.story, STORY_MAX), lines, t: Number.isFinite(e.t) ? e.t : 0 };
+  for (const k of Object.keys(E)){ const e = cleanEntry(k, E[k]); if (e) out.entries[k] = e; }
+  const H = d && typeof d.hall === "object" && d.hall || {};
+  for (const k of Object.keys(H).slice(0, 2000)){
+    const e = cleanEntry(k, H[k]); if (e) out.hall[k] = { ...e, votes: Number.isInteger(H[k].votes) && H[k].votes > 0 ? H[k].votes : 1 };
   }
   const V = d && typeof d.votes === "object" && d.votes || {};
   for (const day of Object.keys(V)){

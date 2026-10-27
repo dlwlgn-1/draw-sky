@@ -14,10 +14,16 @@ test("the same day always gives the same topic", () => {
   assert.ok(t.theme && t.example);
 });
 
-test("every constellation comes round within 8 days, never twice in a row", () => {
-  const cids = days(0, 8).map(d => topicOf(d).cid);
+test("days before the unnamed skies joined keep their topics", () => {
+  assert.equal(topicOf("2026-10-27").cid, "uma");
+  assert.equal(topicOf("2026-10-27").theme, "아침 풍경");
+});
+
+test("from 2026-10-28 every sky comes round, named or not, never twice in a row", () => {
+  const cids = days(1, ORDER.length).map(d => topicOf(d).cid);   // 2026-10-28 onward
+  assert.equal(days(1, 1)[0], "2026-10-28");
   assert.equal(new Set(cids).size, ORDER.length);
-  for (let i = 1; i < 40; i++) assert.notEqual(topicOf(days(i, 1)[0]).cid, topicOf(days(i - 1, 1)[0]).cid);
+  for (let i = 1; i < 60; i++) assert.notEqual(topicOf(days(i, 1)[0]).cid, topicOf(days(i - 1, 1)[0]).cid);
 });
 
 test("no theme repeats until the whole list has been used", () => {

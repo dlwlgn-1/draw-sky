@@ -119,7 +119,7 @@ export function draw(fast = false){
     if (c.id === S.cid) continue;
     const cp = proj(c.cpt, V, .25);
     if (cp && cp.x > 30 && cp.x < w - 30 && cp.y > 40 && cp.y < h - 40){
-      const label = `${c.ko}자리`, tw = x.measureText(label).width;
+      const live = S.peers[c.id] && S.peers[c.id].here, label = live ? `${c.title} · ${live}명` : c.title, tw = x.measureText(label).width;
       x.globalAlpha = .6 * rve; x.fillStyle = COL.sub; x.fillText(label, cp.x, cp.y + 22);
       S.labels.push({ cid: c.id, x0: cp.x - tw / 2 - 12, x1: cp.x + tw / 2 + 12, y0: cp.y - 6, y1: cp.y + 34 });
     }
@@ -142,7 +142,7 @@ export function draw(fast = false){
     if (i === S.selected && !v){ x.strokeStyle = COL.chalk; x.lineWidth = 2; x.beginPath(); x.arc(p.x, p.y, r + 7, 0, 7); x.stroke(); }
   });
   if (S.selected != null && !v && S.P[S.selected]){
-    const s = c.stars[S.selected], p = S.P[S.selected], label = s[1] || `${s[0]} ${c.ab}`;
+    const p = S.P[S.selected], label = c.starName(S.selected);
     x.font = `13px ${UI_FONT}`; const tw = x.measureText(label).width;
     let lx = p.x + 14, ly = p.y - 12; if (lx + tw > w - 8) lx = p.x - 14 - tw; if (ly < 16) ly = p.y + 24;
     x.fillStyle = "rgba(8,12,25,.82)"; x.beginPath(); if (x.roundRect) x.roundRect(lx - 6, ly - 14, tw + 12, 20, 6); else x.rect(lx - 6, ly - 14, tw + 12, 20); x.fill();

@@ -74,3 +74,24 @@ test("stats from the store are cleaned, and survive cleanPlayer", () => {
   assert.equal(cleanPlayer({ stats: { posts: 2 } }).stats.posts, 2);
   assert.equal(BADGES.length, new Set(BADGES.map(b => b.id)).size);
 });
+
+test("hall of fame: lasting copies plus winners still in the store, newest first", async () => {
+  const { hallOf } = await import("../src/game/hall.js");
+  const e = (d, c, name, t = 1) => ({ c, d, name, story: "", lines: [[0, 1]], t });
+  const players = new Map([
+    ["a", { entries: { "2026-10-26_ori": e("2026-10-26", "ori", "사냥꾼") }, votes: {}, hall: { "2026-10-01_leo": { ...e("2026-10-01", "leo", "옛 1위"), votes: 3 } } }],
+    ["b", { entries: { "2026-10-26_ori": e("2026-10-26", "ori", "둘째", 2), "2026-10-27_ori": e("2026-10-27", "ori", "오늘") }, votes: { "2026-10-26": { ori: "a" } }, hall: {} }],
+    ["c", { entries: {}, votes: { "2026-10-27": { ori: "b" } }, hall: {} }]
+  ]);
+  const list = hallOf(players, (d, c) => ranking(players, d, c), "2026-10-27");
+  assert.deepEqual(list.map(x => [x.d, x.name, x.author, x.votes]), [["2026-10-26", "사냥꾼", "a", 1], ["2026-10-01", "옛 1위", "a", 3]]);
+});
+
+test("observe keeps a copy of a won entry in the hall", () => {
+  const entry = { c: "ori", d: "2026-10-26", name: "x", story: "", lines: [[0, 1]], t: 1 };
+  const players = new Map([["me", { entries: { "2026-10-26_ori": entry }, votes: {} }], ["u", { entries: {}, votes: { "2026-10-26": { ori: "me" } } }]]);
+  const s = emptyStats(), hall = {};
+  observe(s, "me", players.get("me").entries, (d, c) => ranking(players, d, c), "2026-10-27", hall);
+  assert.deepEqual(hall["2026-10-26_ori"], { ...entry, votes: 1 });
+  assert.deepEqual(cleanPlayer({ hall }).hall, hall);
+});

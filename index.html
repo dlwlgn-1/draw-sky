@@ -32,7 +32,7 @@
     </div>
     <div class="title" id="titleUI">
       <button class="arrow" id="prevC" aria-label="왼쪽 별자리로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
-      <button class="cname" id="cname" aria-haspopup="dialog"><span class="ko" id="cKo"></span><span class="meta"><span id="cMeta"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></button>
+      <button class="cname" id="cname" aria-haspopup="dialog"><span class="ko" id="cKo"></span><span class="meta"><span id="cMeta"></span><span class="live" id="cLive" hidden></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></button>
       <button class="arrow" id="nextC" aria-label="오른쪽 별자리로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></button>
     </div>
     <button type="button" class="topic" id="topicBtn"><span class="tl">오늘의 주제</span><span class="tt" id="topicText"></span></button>
@@ -99,7 +99,7 @@
       <p class="topic-card" id="rankTopic" hidden></p>
       <ol class="list" id="rankList"></ol>
       <div class="empty" id="rankEmpty" hidden></div>
-      <div class="yday"><h3>어제 1위</h3><div id="yWinner"></div></div>
+      <div class="yday"><div class="yhead"><h3>어제 1위</h3><button type="button" class="hall-link">명예의 전당 ›</button></div><div id="yWinner"></div></div>
     </div>
 
     <div id="badgesBody" hidden>
@@ -109,8 +109,15 @@
       <p class="credit">뱃지는 내 기록으로 계산해요. 작품과 투표는 7일 뒤 지워지지만 뱃지와 기록은 남아요.</p>
     </div>
 
+    <div id="hallBody" hidden>
+      <p class="sub-note">하루가 끝나면 별자리마다 별을 가장 많이 받은 작품이 여기에 남아요. 누르면 하늘에서 볼 수 있어요.</p>
+      <div id="hallList"></div>
+      <div class="empty" id="hallEmpty" hidden></div>
+    </div>
+
     <div id="pickBody" hidden>
-      <p class="sub-note">고르면 하늘이 그 별자리로 움직여요.</p>
+      <p class="sub-note">고르면 하늘이 그쪽으로 움직여요.</p>
+      <button type="button" class="hall-link block">명예의 전당 · 날마다 별자리별 1위 모아 보기 ›</button>
       <ul class="list" id="pickList"></ul>
       <p class="credit">별의 위치·밝기·색은 히파르코스 위성 관측을 정리한 XHIP 목록, 은하수 모양은 d3-celestial의 은하수 윤곽 데이터를 썼어요. 성운과 은하는 실제 위치와 크기에 맞춰 그렸어요.</p>
     </div>
