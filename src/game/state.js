@@ -12,6 +12,7 @@ export const S = {
   ghost: false,          // show the traditional figure
   selected: null, down: null, noRefit: false,
   posting: false, saving: false,   // a post or an image save is under way
+  slow: false,           // the store has not answered for a while (connection blocked?)
   spin: true,            // move the sky between constellations (off: switch at once)
   drafts: {}, history: {},
   players: new Map(), mine: null, loaded: false, dbChecked: false,
@@ -19,6 +20,8 @@ export const S = {
   db: null, myId: null, canWrite: null, chain: Promise.resolve(),
   day: today(), cam: null, reveal: 0, P: [], R: [], labels: []
 };
+
+export const SLOW = "저장 서버에 연결되지 않고 있어요. 광고 차단 프로그램을 끄거나 다른 네트워크(휴대폰 데이터 등)에서 다시 열어 주세요.";
 
 export const cur = () => BYID[S.cid];
 export const draft = (cid = S.cid) => S.drafts[cid] ||= { lines: [], name: "", story: "", touched: false };
@@ -38,6 +41,6 @@ export function whyNot(){
   if (!S.db) return "저장소에 연결되지 않아 지금은 그려 보기만 할 수 있어요.";
   if (!S.myId) return "로그인해야 올리고 별을 줄 수 있어요.";
   if (S.canWrite === false) return "보기 전용 링크예요. 공유한 사람에게 참여 권한을 요청하세요.";
-  if (!S.loaded) return "작품을 불러오는 중이에요.";
+  if (!S.loaded) return S.slow ? SLOW : "작품을 불러오는 중이에요.";
   return "";
 }

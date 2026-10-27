@@ -19,6 +19,8 @@ const config = {
   appId: env.VITE_FIREBASE_APP_ID
 };
 const BEAT = 120e3, FRESH = 300e3;   // refresh my presence this often; one older than FRESH means the page has gone
+const LIVE = { includeMetadataChanges: true };   // also hear when a cached answer is confirmed by the server
+const confirmed = snap => !snap.metadata.fromCache && !snap.metadata.hasPendingWrites;
 
 /* Firestore cannot store arrays inside arrays, so each entry's lines [[a, b], …] are kept flat as [a, b, a, b, …] */
 function mapLines(d, f){
@@ -69,11 +71,14 @@ export async function openBackend(){
     myId: uid, canWrite: true, hasStore: true,
     needsNick: true,   // no account names here: players pick a nickname, kept in their own document
     siteUrl: location.origin + location.pathname.replace(/index\.html$/, ""),
+    /* only what the server has confirmed: with no connection Firestore answers from its (empty) memory cache,
+       which would look like "nobody has posted anything, me included" (see game/store.js), and a save still on
+       its way would look done even if it never arrives */
     watchPlayers(onDocs, onErr){
-      return onSnapshot(query(collection(db, "players"), limit(1000)), snap => onDocs(snap.docs.map(d => [d.id, fromStore(d.data())])), onErr);
+      return onSnapshot(query(collection(db, "players"), limit(1000)), LIVE, snap => { if (confirmed(snap)) onDocs(snap.docs.map(d => [d.id, fromStore(d.data())])); }, onErr);
     },
     watchPlayer(id, onDoc, onErr){
-      return onSnapshot(doc(db, "players", id), snap => onDoc(snap.exists() ? fromStore(snap.data()) : null), onErr);
+      return onSnapshot(doc(db, "players", id), LIVE, snap => { if (confirmed(snap)) onDoc(snap.exists() ? fromStore(snap.data()) : null); }, onErr);
     },
     savePlayer: (id, data) => setDoc(doc(db, "players", id), mapLines(data, flatLines)).catch(translate),
     names: async () => ({}),

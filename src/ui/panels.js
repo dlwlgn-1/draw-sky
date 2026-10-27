@@ -51,7 +51,7 @@ export async function renderBottom(){
     $("#clearBtn").disabled = !d.lines.length;
     $("#ghostBtn").setAttribute("aria-pressed", String(S.ghost));
     const list = rank(today(), S.cid), mine = list.find(e => e.author === S.myId), sum = $("#rankSum"); sum.textContent = "";
-    if (S.db && !S.loaded) sum.textContent = "불러오는 중…";
+    if (S.db && !S.loaded) sum.textContent = S.slow ? "서버에 연결되지 않음" : "불러오는 중…";
     else if (mine) sum.textContent = `내 작품 ${mine.rank}위 · ${list.length}작품`;
     else if (list.length) sum.append(el("em", null, list[0].name), document.createTextNode(` 1위 · ${list.length}작품`));
     else sum.textContent = "아직 아무도 안 그렸어요";
