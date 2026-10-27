@@ -68,6 +68,7 @@ export async function openBackend(){
   return {
     myId: uid, canWrite: true, hasStore: true,
     needsNick: true,   // no account names here: players pick a nickname, kept in their own document
+    siteUrl: location.origin + location.pathname.replace(/index\.html$/, ""),
     watchPlayers(onDocs, onErr){
       return onSnapshot(query(collection(db, "players"), limit(1000)), snap => onDocs(snap.docs.map(d => [d.id, fromStore(d.data())])), onErr);
     },

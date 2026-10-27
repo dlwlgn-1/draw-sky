@@ -97,10 +97,9 @@ button:disabled{cursor:default}
 .vtop{display:flex;align-items:center;gap:8px}
 .vrank{font-family:var(--name);font-weight:700;color:var(--night);background:var(--sticker);border-radius:8px;padding:1px 8px;font-size:.9rem}
 .vrank.plain{background:rgba(255,255,255,.1);color:var(--text)}
-.vday{font-size:.8rem;color:var(--sub)}
-.x{margin-left:auto;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--sub);background:rgba(255,255,255,.07)}
+.vday{font-size:.8rem;color:var(--sub);margin-right:auto}
+.x{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--sub);background:rgba(255,255,255,.07)}
 .x svg{width:16px;height:16px}
-.x + .x{margin-left:6px}
 .vcard h2{font-size:1.5rem;margin-top:8px;overflow-wrap:anywhere}
 .vby{font-size:.82rem;color:var(--sub);margin-top:2px}
 .vby b{color:var(--text)}
@@ -202,6 +201,9 @@ button:disabled{cursor:default}
 .account p span{font-size:.76rem;color:var(--dim)}
 .gbtn{display:inline-flex;align-items:center;gap:8px;background:#fff;color:#1f1f1f;border-radius:999px;padding:8px 14px;font-size:.86rem;font-weight:500;white-space:nowrap}
 .gbtn svg{width:18px;height:18px}
+.sharebox{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px}
+.sharebox p{flex:1 0 100%;font-size:.8rem;color:var(--sub)}
+.sharebox .pill{background:rgba(255,255,255,.08)}
 .mystats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:16px}
 .tile{background:rgba(255,255,255,.05);border-radius:12px;padding:10px 12px;display:grid;gap:1px;min-width:0}
 .tile .l{font-size:.74rem;color:var(--sub)}

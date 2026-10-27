@@ -2,12 +2,12 @@
 import { S, draft, canAct, whyNot } from "../game/state.js";
 import { NAME_MAX, STORY_MAX, NICK_MAX } from "../game/rules.js";
 import { writeError } from "../game/store.js";
-import { selectConst, stepConst, undoLine, clearLines, closeEntry, stepEntry, vote, postEntry, removeEntry, saveEntryImage, signInGoogle, signOutAccount } from "../game/actions.js";
+import { selectConst, stepConst, undoLine, clearLines, closeEntry, stepEntry, vote, postEntry, removeEntry, saveEntryImage, signInGoogle, signOutAccount, shareEntry, shareDay } from "../game/actions.js";
 import { requestDraw } from "../sky/motion.js";
 import { renderBottom, renderSheet, openSheet, closeSheet, renderSpin, updateLens } from "./panels.js";
 import { $, toast, store } from "./dom.js";
 import { topicOf } from "../game/topic.js";
-import { today } from "../game/time.js";
+import { today, yesterday } from "../game/time.js";
 
 export function bindControls(){
   $("#spinBtn").addEventListener("click", () => {
@@ -45,13 +45,20 @@ export function bindControls(){
     try {
       const again = await postEntry(name, story, nick);
       S.posting = false; closeSheet();
-      toast(again ? "고친 작품으로 바꿨어요" : "하늘에 올렸어요!");
+      const ask = S.backend && S.backend.siteUrl ? " 친구에게 링크를 보내 별을 모아 보세요" : "";
+      toast(again ? "고친 작품으로 바꿨어요" : `하늘에 올렸어요!${ask}`);
     } catch (err){ S.posting = false; toast(writeError(err), true); renderSheet(); }
   });
 
   $("#vClose").addEventListener("click", closeEntry);
   $("#vSave").addEventListener("click", saveEntryImage);
-  $("#vVote").addEventListener("click", () => { if (S.viewing) vote(S.viewing.author, S.cid, S.viewing.day); });
+  $("#vShare").addEventListener("click", shareEntry);
+  $("#vVote").addEventListener("click", () => {
+    if (!S.viewing) return;
+    if (S.viewing.author === S.myId) shareEntry(); else vote(S.viewing.author, S.cid, S.viewing.day);
+  });
+  $("#shareToday").addEventListener("click", () => shareDay(today()));
+  $("#shareYday").addEventListener("click", () => shareDay(yesterday()));
   $("#vPrev").addEventListener("click", () => stepEntry(-1));
   $("#vNext").addEventListener("click", () => stepEntry(1));
   $("#vRemove").addEventListener("click", () => {

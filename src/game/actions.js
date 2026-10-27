@@ -3,7 +3,7 @@ import { S, draft, rank, canAct, whyNot, viewedEntry } from "./state.js";
 import { MAX_LINES, toggleVote } from "./rules.js";
 import { recordPost, recordVote, stamp } from "./badges.js";
 import { topicOf } from "./topic.js";
-import { today, kstHour } from "./time.js";
+import { today, kstHour, untilMidnight } from "./time.js";
 import { ORDER, BYID } from "../data/constellations.js";
 import { writeMine, writeError } from "./store.js";
 import { flyTo, requestDraw } from "../sky/motion.js";
@@ -11,6 +11,8 @@ import { renderTop, renderBottom } from "../ui/panels.js";
 import { toast } from "../ui/dom.js";
 import { entryCard } from "../sky/card.js";
 import { names } from "./store.js";
+import { entryLink, entryText, dayReport } from "./share.js";
+import { hallOf } from "./hall.js";
 
 /* join stars a and b, or remove the line if they are already joined */
 export function toggleLine(a, b){
@@ -95,13 +97,63 @@ export async function saveEntryImage(){
   try {
     const tp = topicOf(v.d), nm = await names([v.author]);
     const author = v.author === S.myId ? "내 작품" : nm[v.author];
-    const blob = await entryCard(v, BYID[v.c], author, tp.cid === v.c ? tp.theme : "");
+    const site = S.backend.siteUrl ? new URL(S.backend.siteUrl).host : "";
+    const blob = await entryCard(v, BYID[v.c], author, tp.cid === v.c ? tp.theme : "", site);
     const safe = v.name.replace(/[\\/:*?"<>|]/g, "").trim() || "별자리";
     await S.backend.saveFile(`${safe}.png`, blob);
     toast("이미지로 저장했어요");
   } catch (err){
     if (!err || err.code !== "declined") toast("이미지를 저장하지 못했어요.", true);
   } finally { S.saving = false; renderBottom(); }
+}
+
+/* hand words and a link to the phone's share sheet (KakaoTalk, messages, …), or copy them where there is none */
+async function sendOut(text, url){
+  if (navigator.share){
+    try { await navigator.share({ title: "다시 그린 하늘", text, url }); return; }
+    catch (err){ if (err && err.name === "AbortError") return; }   // closed by the player; anything else: copy instead
+  }
+  try { await navigator.clipboard.writeText(`${text}\n${url}`); toast("복사했어요. 카톡이나 메시지에 붙여 넣어 보내 주세요"); }
+  catch { toast("공유하지 못했어요. 주소창의 링크를 복사해 보내 주세요.", true); }
+}
+
+/* share the entry being viewed: a link that opens it, with a line asking for a star while votes are open */
+export async function shareEntry(){
+  const v = viewedEntry(), base = S.backend && S.backend.siteUrl;
+  if (!v || !base) return;
+  const mine = v.author === S.myId, nm = mine ? {} : await names([v.author]);
+  await sendOut(entryText(v, nm[v.author], mine, v.d === today()), entryLink(base, v.c, v.d, v.author));
+}
+
+/* my entries on a day, with where they stand */
+export function myDay(day){
+  if (!S.mine || !S.myId) return [];
+  return Object.values(S.mine.entries).filter(e => e.d === day).flatMap(e => {
+    const r = rank(day, e.c).find(x => x.author === S.myId);
+    return r ? [{ c: e.c, name: e.name, rank: r.rank, votes: r.votes }] : [];
+  });
+}
+
+/* share how my day went; while it is open the link goes to my best entry, so friends can star it */
+export async function shareDay(day){
+  const base = S.backend && S.backend.siteUrl, mine = myDay(day), open = day === today();
+  if (!base || !mine.length) return;
+  const best = [...mine].sort((a, b) => a.rank - b.rank || b.votes - a.votes)[0];
+  await sendOut(dayReport(day, mine, open, Math.floor(untilMidnight() / 36e5)), open ? entryLink(base, best.c, day, S.myId) : base);
+}
+
+/* the page was opened from an entry link: once everything has loaded, show that entry (or say it is gone) */
+export function followLink(){
+  const l = S.link; if (!l || !S.loaded) return;
+  S.link = null;
+  try { history.replaceState(null, "", location.pathname); } catch {}
+  if (rank(l.day, l.cid).some(e => e.author === l.author)){
+    if (S.cid === l.cid) showEntry(l.day, l.author); else selectConst(l.cid, { day: l.day, author: l.author });
+    return;
+  }
+  const kept = hallOf(S.players, rank, today()).find(e => e.c === l.cid && e.d === l.day && e.author === l.author);
+  if (kept) selectConst(l.cid, { day: l.day, author: l.author, entry: kept });
+  else toast("이 작품은 내려갔거나 기간이 지나 볼 수 없어요. 대신 오늘의 하늘을 다시 그려 보세요.");
 }
 
 /* link a Google account (Firebase only). Switching to another account's record reloads the page. */

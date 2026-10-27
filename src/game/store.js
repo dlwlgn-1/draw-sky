@@ -7,6 +7,7 @@ import { peersBySky, sharePresence } from "./presence.js";
 import { openBackend } from "#backend";   // backend/claude.js or backend/firebase.js, chosen in vite.config.js
 import { renderUI } from "../ui/panels.js";
 import { toast } from "../ui/dom.js";
+import { followLink } from "./actions.js";
 
 export async function connect(){
   const be = await openBackend().catch(err => { console.warn("backend unavailable", err); return null; });
@@ -21,7 +22,7 @@ export async function connect(){
   /* Writing replaces my whole document, so nothing is written until my own document has been read:
      it is watched on its own (the list of everyone may not include it), and a failed read never counts as loaded. */
   let gotAll = false, gotMine = !S.myId;
-  const changed = () => { S.loaded = gotAll && gotMine; renderUI(); checkProgress(); };
+  const changed = () => { S.loaded = gotAll && gotMine; renderUI(); checkProgress(); followLink(); };
   const failed = () => { toast("작품 목록을 받아오지 못하고 있어요. 페이지를 새로 열어 주세요.", true); renderUI(); };
   const putMine = m => { if (!S.myId || !gotMine) return; if (S.mine) m.set(S.myId, S.mine); else m.delete(S.myId); };
   if (S.myId) be.watchPlayer(S.myId, d => { S.mine = d ? cleanPlayer(d) : null; gotMine = true; putMine(S.players); changed(); }, failed);

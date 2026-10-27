@@ -4,6 +4,7 @@ import { BADGES, emptyStats, drewNamed, drewRegions } from "../game/badges.js";
 import { shortDay, today, yesterday } from "../game/time.js";
 import { rng } from "../sky/math.js";
 import { $, el } from "./dom.js";
+import { myDay } from "../game/actions.js";
 
 const BY = Object.fromEntries(BADGES.map(b => [b.id, b]));
 const hash = s => { let h = 2166136261; for (const ch of s) h = Math.imul(h ^ ch.codePointAt(0), 16777619); return h >>> 0; };
@@ -26,6 +27,7 @@ export function renderBadgeSheet(){
   $("#sheetTitle").textContent = `내 뱃지 ${Object.keys(got).length} / ${BADGES.length}`;
   const note = $("#badgeNotice"), why = canAct() ? "" : whyNot(); note.hidden = !why; note.textContent = why;
   renderAccount();
+  renderShare();
 
   const tiles = $("#myStats"); tiles.textContent = "";
   for (const [label, value, sub] of [
@@ -48,6 +50,13 @@ export function renderBadgeSheet(){
     li.setAttribute("aria-label", on ? `${b.name}, ${shortDay(got[b.id])}에 얻음` : b.secret ? "숨은 뱃지, 아직 못 얻음" : `${b.name}, 아직 못 얻음: ${b.how}`);
     ul.append(li);
   }
+}
+
+/* sharing my day, where there is a public address to link to */
+function renderShare(){
+  const can = !!(S.backend && S.backend.siteUrl), t = can && myDay(today()).length, y = can && myDay(yesterday()).length;
+  $("#shareBox").hidden = !t && !y;
+  $("#shareToday").hidden = !t; $("#shareYday").hidden = !y;
 }
 
 /* the account box, where the backend has accounts (Firebase): anonymous or a linked Google account */

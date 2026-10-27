@@ -11,6 +11,7 @@
      names(ids)                  { id: display name or "" }
      saveFile(filename, blob)    offer a file to the player, or null when this view cannot
      needsNick                   true when the backend has no names, so players choose a nickname
+     siteUrl                     the public address entry links are built on, or null where there is none (here)
      account(), signInGoogle(), signOut()   accounts, where the backend has them (Firebase); absent here
      setPresence(state)          share a small object about me with everyone here now (no-op without a room)
      watchPeers(onPeers)         onPeers([{ kind, isMe, by, peer, presence }, …]) when the room changes, or null */
@@ -23,7 +24,7 @@ export async function openBackend(){
   return {
     myId: user ? await safe(() => user.id()) : null,
     canWrite: user ? await safe(() => user.can("data.write")) : null,
-    hasStore: !!db,
+    hasStore: !!db, siteUrl: null,
     watchPlayers(onDocs, onErr){
       return db.collection("players").limit(1000).onSnapshot(snap => onDocs(snap.docs.filter(d => d.exists).map(d => [d.id, d.data()])), onErr);
     },

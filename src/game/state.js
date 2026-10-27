@@ -6,6 +6,7 @@ import { today } from "./time.js";
 export const S = {
   cid: "ori",            // chosen constellation
   viewing: null,         // { day, author } while looking at someone's entry on the big sky
+  link: null,            // { cid, day, author } from an entry link the page was opened with, until it is shown
   sheet: null,           // "form" | "rank" | "pick" | "badges" | "hall"
   peers: {},             // who else is on each sky right now: { cid: { here, drawing } }
   ghost: false,          // show the traditional figure

@@ -18,8 +18,9 @@ function wrap(x, text, maxW, maxLines){
   return out;
 }
 
-/* entry: { name, story, lines, d }; c: its constellation; author: display name; theme: today's theme or "" */
-export async function entryCard(entry, c, author, theme){
+/* entry: { name, story, lines, d }; c: its constellation; author: display name; theme: today's theme or "";
+   site: the address to print at the foot ("" for none), so a picture shared on its own still leads back */
+export async function entryCard(entry, c, author, theme, site = ""){
   try { await Promise.all([document.fonts.load(`700 72px ${NAME_FONT}`), document.fonts.load(`32px ${UI_FONT}`)]); } catch {}
   const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
   const x = cv.getContext("2d");
@@ -60,6 +61,10 @@ export async function entryCard(entry, c, author, theme){
   if (entry.story){
     x.fillStyle = COL.text; x.font = `36px ${NAME_FONT}`;
     wrap(x, entry.story, W - 2 * L, 2).forEach((t, i) => x.fillText(t, L, H - 150 + i * 54));
+  }
+  if (site){
+    x.fillStyle = COL.chalk; x.font = `26px ${UI_FONT}`; x.textAlign = "right";
+    x.fillText(`나도 다시 그려 보기 · ${site}`, W - L, H - 34);
   }
   return new Promise((res, rej) => cv.toBlob(b => b ? res(b) : rej(new Error("toBlob")), "image/png"));
 }

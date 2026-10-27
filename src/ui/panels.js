@@ -69,14 +69,17 @@ export async function renderBottom(){
   $("#vPrev").hidden = $("#vNext").hidden = list.length < 2;
   $("#vRemove").hidden = !(v.author === S.myId && isToday);
   $("#vSave").hidden = !(S.backend && S.backend.saveFile); $("#vSave").disabled = !!S.saving;
+  $("#vShare").hidden = !(S.backend && S.backend.siteUrl);
 }
+/* the big star button; on my own entry today (where links can be shared) it asks friends for stars instead */
 function fillStar(b, e, cid, isToday){
   const mine = e.author === S.myId, voted = isToday && myVote(today(), cid) === e.author;
+  const ask = mine && isToday && !!(S.backend && S.backend.siteUrl);
   b.innerHTML = voted || mine ? STAR_SVG : STAR_O_SVG;
-  b.append(document.createTextNode(!isToday ? `별 ${e.votes}개` : mine ? `내 작품 · ${e.votes}` : voted ? `별 줬어요 · ${e.votes}` : `별 주기 · ${e.votes}`));
+  b.append(document.createTextNode(!isToday ? `별 ${e.votes}개` : ask ? `친구에게 별 부탁하기 · ${e.votes}` : mine ? `내 작품 · ${e.votes}` : voted ? `별 줬어요 · ${e.votes}` : `별 주기 · ${e.votes}`));
   b.setAttribute("aria-pressed", String(voted));
-  b.disabled = mine || !isToday || !canAct();
-  b.setAttribute("aria-label", `${mine ? "내 작품" : voted ? "별 회수하기" : "별 주기"}, 별 ${e.votes}개`);
+  b.disabled = ask ? false : mine || !isToday || !canAct();
+  b.setAttribute("aria-label", ask ? `내 작품 링크 보내고 별 부탁하기, 별 ${e.votes}개` : `${mine ? "내 작품" : voted ? "별 회수하기" : "별 주기"}, 별 ${e.votes}개`);
 }
 /* day: the day this list shows; the vote is refused if the day has turned since */
 function voteChip(e, cid, day){

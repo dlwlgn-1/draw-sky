@@ -4,6 +4,7 @@ import { S } from "./game/state.js";
 import { cleanLines, str, NAME_MAX, STORY_MAX } from "./game/rules.js";
 import { topicOf } from "./game/topic.js";
 import { today } from "./game/time.js";
+import { parseLink } from "./game/share.js";
 import { connect } from "./game/store.js";
 import { loadSky } from "./sky/catalog.js";
 import { sky, fit } from "./sky/projection.js";
@@ -28,8 +29,10 @@ function start(data){
       if (d && typeof d === "object") S.drafts[c.id] = { lines: cleanLines(d.lines, c.stars.length), name: str(d.name, NAME_MAX), story: typeof d.story === "string" ? d.story.slice(0, STORY_MAX) : "", touched: !!d.touched };
     }
   }
-  /* a fresh visit starts on today's constellation, so everyone meets on the same sky */
-  const tp = topicOf(today()), cid = data.cid || tp.cid; if (typeof cid === "string" && Object.hasOwn(BYID, cid)) S.cid = cid;
+  /* a fresh visit starts on today's constellation, so everyone meets on the same sky;
+     one opened from an entry link starts on that entry's sky and shows the entry once it has loaded */
+  S.link = data.cid ? null : parseLink(location.search);
+  const tp = topicOf(today()), cid = data.cid || (S.link && S.link.cid) || tp.cid; if (typeof cid === "string" && Object.hasOwn(BYID, cid)) S.cid = cid;
   if (data.ghost) S.ghost = true;
   S.spin = load("rs-spin") !== false; renderSpin();
 
@@ -44,8 +47,8 @@ function start(data){
 
   const skyLoaded = fetch("sky.json").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(d => { loadSky(d); refit(); }).catch(() => {});
-  /* a republish lands straight on the sky; a fresh visit starts at the entrance */
-  const entered = data.cid ? ($("#intro").hidden = true, Promise.resolve()) : runIntro();
+  /* a republish or an entry link lands straight on the sky; a fresh visit starts at the entrance */
+  const entered = data.cid || S.link ? ($("#intro").hidden = true, Promise.resolve()) : runIntro();
   Promise.all([skyLoaded, entered]).then(() => { if (!isMoving()){ S.cam = fit(S.cid); startReveal(); } });
   connect();
 }
