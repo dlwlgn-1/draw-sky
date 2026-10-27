@@ -1,5 +1,5 @@
 /* The black entrance screen: push the small star up; it grows and brightens until the sky opens. */
-import { $, COL } from "./dom.js";
+import { $, el, COL } from "./dom.js";
 
 const I = { on: false, p: 0, drag: null, doneT: 0, resolve: null };
 const icv = $("#introSky"), ictx = icv.getContext("2d");
@@ -63,7 +63,10 @@ export function runIntro(){
   requestAnimationFrame(drawIntro);
   return new Promise(r => { I.resolve = r; });
 }
-export function bindIntro(){
+/* topic: today's { theme, place } shown under the title */
+export function bindIntro(topic){
+  const t = $("#introTopic"); t.textContent = "";
+  t.append(document.createTextNode("오늘의 주제 "), el("b", null, topic.theme), document.createTextNode(` · ${topic.place}`));
   const ipt = ev => { const r = icv.getBoundingClientRect(); return { x: ev.clientX - r.left, y: ev.clientY - r.top }; };
   icv.addEventListener("pointerdown", ev => {
     if (I.doneT) return;

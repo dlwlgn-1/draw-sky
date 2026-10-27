@@ -18,13 +18,14 @@
   <div class="copy inner">
     <h1 id="introTitle">다시 그린 하늘</h1>
     <p class="lead">오늘 밤, 별을 다시 이어 보세요</p>
+    <p class="today" id="introTopic"></p>
   </div>
   <p class="hint-up" id="introHint">작은 별을 위로 밀어 올려 주세요</p>
   <button type="button" class="sr" id="introOpen">하늘 열기</button>
 </section>
 
 <header class="top">
-  <div class="inner">
+  <div class="inner" id="topUI">
     <div class="bar">
       <span class="logo">다시 그린 하늘</span>
       <span class="right"><button type="button" class="spin" id="spinBtn" aria-pressed="true">이동 연출 켜짐</button><span class="clock num">마감까지 <b id="countdown">--:--:--</b></span></span>
@@ -34,6 +35,7 @@
       <button class="cname" id="cname" aria-haspopup="dialog"><span class="ko" id="cKo"></span><span class="meta"><span id="cMeta"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></button>
       <button class="arrow" id="nextC" aria-label="오른쪽 별자리로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></button>
     </div>
+    <button type="button" class="topic" id="topicBtn"><span class="tl">오늘의 주제</span><span class="tt" id="topicText"></span></button>
   </div>
 </header>
 
@@ -80,6 +82,7 @@
     <div id="formBody" hidden>
       <div class="notice" id="formNotice" hidden></div>
       <form class="form" id="entryForm" novalidate>
+        <p class="topic-card" id="formTopic" hidden></p>
         <div class="preview"><canvas id="formThumb"></canvas><p id="formInfo"></p></div>
         <label class="sr" for="nameInput">새 별자리 이름</label>
         <input class="name-in" id="nameInput" maxlength="20" placeholder="이름을 지어 주세요" autocomplete="off">
@@ -92,6 +95,7 @@
 
     <div id="rankBody" hidden>
       <p class="sub-note">별자리마다 하루 한 작품에만 별을 줄 수 있어요. 다른 작품에 주면 별이 옮겨 가요.</p>
+      <p class="topic-card" id="rankTopic" hidden></p>
       <ol class="list" id="rankList"></ol>
       <div class="empty" id="rankEmpty" hidden></div>
       <div class="yday"><h3>어제 1위</h3><div id="yWinner"></div></div>

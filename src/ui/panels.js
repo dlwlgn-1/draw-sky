@@ -1,6 +1,7 @@
 /* Everything drawn in HTML around the sky: title, bottom controls, entry card, and the sheets. */
 import { S, cur, draft, rank, viewedEntry, myVote, canAct, whyNot } from "../game/state.js";
 import { today, yesterday, shortDay } from "../game/time.js";
+import { topicOf } from "../game/topic.js";
 import { BYID, ORDER } from "../data/constellations.js";
 import { names } from "../game/store.js";
 import { vote, selectConst, showEntry } from "../game/actions.js";
@@ -13,6 +14,10 @@ export function renderTop(){
   $("#cKo").textContent = `${c.ko}자리`;
   $("#cMeta").textContent = `${c.la} · ${!S.loaded && S.db ? "…" : n ? `오늘 ${n}작품` : "오늘 아직 없음"}`;
   $("#cname").setAttribute("aria-label", `${c.ko}자리, 별자리 목록 열기`);
+  const tp = topicOf(today()), here = tp.cid === S.cid, btn = $("#topicBtn");
+  $("#topicText").textContent = here ? tp.theme : `${BYID[tp.cid].ko}자리 · ${tp.theme}`;
+  btn.classList.toggle("away", !here);
+  btn.setAttribute("aria-label", here ? `오늘의 주제 ${tp.theme}, 예시 보기` : `오늘의 주제 ${tp.theme}, ${BYID[tp.cid].ko}자리로 이동`);
 }
 let vSeq = 0;
 export async function renderBottom(){
@@ -26,7 +31,10 @@ export async function renderBottom(){
     if (S.selected != null){
       const s = c.stars[S.selected];
       hint.append(el("b", null, `${s[0]} ${c.ab}${s[1] ? " " + s[1] : ""}`), document.createTextNode(` · ${s[4].toFixed(1)}등급 · 적경 ${fmtRA(s[2])} 적위 ${fmtDec(s[3])}`));
-    } else if (!d.lines.length) hint.textContent = "밝게 빛나는 별 두 개를 차례로 눌러 선을 이어 보세요";
+    } else if (!d.lines.length){
+      const tp = topicOf(today());
+      hint.textContent = tp.cid === S.cid ? `주제 ‘${tp.theme}’ — 떠오르는 모양대로 별을 이어 보세요` : "밝게 빛나는 별 두 개를 차례로 눌러 선을 이어 보세요";
+    }
     else hint.textContent = "하늘을 좌우로 밀면 다른 별자리로 넘어가요";
     $("#lineCount").textContent = d.lines.length ? `선 ${d.lines.length}개` : "";
     $("#undoBtn").disabled = !(S.history[S.cid] && S.history[S.cid].length);
@@ -88,11 +96,13 @@ export async function renderSheet(){
   sh.hidden = scrim.hidden = !S.sheet;
   if (!S.sheet) return;
   $("#formBody").hidden = S.sheet !== "form"; $("#rankBody").hidden = S.sheet !== "rank"; $("#pickBody").hidden = S.sheet !== "pick";
-  const c = cur(), d = today(), seq = ++sSeq;
+  const c = cur(), d = today(), seq = ++sSeq, tp = topicOf(d), here = tp.cid === S.cid;
   if (S.sheet === "form"){
     $("#sheetTitle").textContent = `${c.ko}자리에 새 이름 붙이기`;
     const dr = draft(), mine = S.mine && S.mine.entries[d + "_" + S.cid];
     const n = $("#formNotice"), why = canAct() ? "" : whyNot(); n.hidden = !why; n.textContent = why;
+    topicCard($("#formTopic"), here && tp, `예: ${tp.example}`);
+    $("#nameInput").placeholder = here ? `예: ${tp.example.split(",")[0]}` : "이름을 지어 주세요";
     const info = $("#formInfo"); info.textContent = "";
     if (dr.lines.length < 2) info.append(el("b", null, "선을 두 개 이상 이어야 올릴 수 있어요."), document.createTextNode(" 시트를 닫고 하늘에서 별을 이어 주세요."));
     else info.append(el("b", null, `선 ${dr.lines.length}개 · 별 ${new Set(dr.lines.flat()).size}개`), document.createTextNode(mine ? " · 오늘 올린 작품을 이 그림으로 바꿔요" : " · 오늘 자정까지 순위에 올라가요"));
@@ -103,6 +113,7 @@ export async function renderSheet(){
   }
   if (S.sheet === "rank"){
     $("#sheetTitle").textContent = `${c.ko}자리 오늘 순위`;
+    topicCard($("#rankTopic"), here && tp, "오늘 이 주제로 그린 작품들이에요");
     const list = rank(d, S.cid), ylist = rank(yesterday(), S.cid), yw = ylist[0] && ylist[0].votes > 0 ? ylist[0] : null;
     const nm = await names([...new Set([...list.map(e => e.author), ...(yw ? [yw.author] : [])])]);
     if (seq !== sSeq) return;
@@ -118,17 +129,19 @@ export async function renderSheet(){
     return;
   }
   $("#sheetTitle").textContent = "별자리 고르기";
-  const rows = ORDER.map(id => ({ k: BYID[id], list: rank(d, id) }));
+  /* today's constellation comes first */
+  const rows = [tp.cid, ...ORDER.filter(id => id !== tp.cid)].map(id => ({ k: BYID[id], list: rank(d, id) }));
   const nm = await names([...new Set(rows.flatMap(r => r.list.length ? [r.list[0].author] : []))]);
   if (seq !== sSeq) return;
   const ul = $("#pickList"); ul.textContent = "";
   for (const { k, list } of rows){
     const li = el("li", "prow"); li.tabIndex = 0; li.setAttribute("role", "button");
     const cv = el("canvas"), meta = el("div", "meta"), top = list[0];
-    meta.append(el("span", "nm", `${k.ko}자리`));
+    const nmEl = el("span", "nm", `${k.ko}자리`); if (k.id === tp.cid) nmEl.append(el("span", "tag", "오늘의 주제"));
+    meta.append(nmEl);
     const by = el("span", "by");
     if (top) by.append(el("i", null, `★${top.votes}`), document.createTextNode(` 1위 ‘${top.name}’ · ${nm[top.author]} · ${list.length}작품`));
-    else by.textContent = `${k.la} · 오늘 아직 없음`;
+    else by.textContent = k.id === tp.cid ? `주제 ‘${tp.theme}’ · 오늘 아직 없음` : `${k.la} · 오늘 아직 없음`;
     meta.append(by);
     li.append(cv, meta);
     if (k.id === S.cid) li.append(el("span", "here", "지금 여기"));
@@ -140,6 +153,11 @@ export async function renderSheet(){
     ul.append(li);
     requestAnimationFrame(() => drawThumb(cv, k, { ghost: true, bare: true, ghostAlpha: .8 }));
   }
+}
+/* today's theme in a sheet, or hidden when the sheet is about another constellation */
+function topicCard(box, tp, note){
+  box.hidden = !tp; box.textContent = "";
+  if (tp) box.append(el("b", null, `오늘의 주제 · ${tp.theme}`), document.createTextNode(note));
 }
 export function renderUI(){ renderTop(); renderBottom(); if (S.sheet) renderSheet(); requestDraw(); }
 

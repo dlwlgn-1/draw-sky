@@ -2,10 +2,12 @@
 import { S, draft, canAct, whyNot } from "../game/state.js";
 import { NAME_MAX, STORY_MAX } from "../game/rules.js";
 import { writeError } from "../game/store.js";
-import { stepConst, undoLine, clearLines, closeEntry, stepEntry, vote, postEntry, removeEntry } from "../game/actions.js";
+import { selectConst, stepConst, undoLine, clearLines, closeEntry, stepEntry, vote, postEntry, removeEntry } from "../game/actions.js";
 import { requestDraw } from "../sky/motion.js";
 import { renderBottom, renderSheet, openSheet, closeSheet, renderSpin, updateLens } from "./panels.js";
 import { $, toast, store } from "./dom.js";
+import { topicOf } from "../game/topic.js";
+import { today } from "../game/time.js";
 
 export function bindControls(){
   $("#spinBtn").addEventListener("click", () => {
@@ -15,6 +17,11 @@ export function bindControls(){
   $("#prevC").addEventListener("click", () => stepConst(-1));
   $("#nextC").addEventListener("click", () => stepConst(1));
   $("#cname").addEventListener("click", () => openSheet("pick"));
+  $("#topicBtn").addEventListener("click", () => {
+    const tp = topicOf(today());
+    if (tp.cid !== S.cid) selectConst(tp.cid);
+    else toast(`오늘의 주제 ‘${tp.theme}’ · 예: ${tp.example}`);
+  });
   $("#rankBtn").addEventListener("click", () => openSheet("rank"));
   $("#openForm").addEventListener("click", () => openSheet("form"));
   $("#ghostBtn").addEventListener("click", () => { S.ghost = !S.ghost; renderBottom(); requestDraw(); });

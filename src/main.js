@@ -2,6 +2,8 @@
 import { DATA, BYID } from "./data/constellations.js";
 import { S } from "./game/state.js";
 import { cleanLines, str, NAME_MAX, STORY_MAX } from "./game/rules.js";
+import { topicOf } from "./game/topic.js";
+import { today } from "./game/time.js";
 import { connect } from "./game/store.js";
 import { loadSky } from "./sky/catalog.js";
 import { sky, fit } from "./sky/projection.js";
@@ -26,11 +28,12 @@ function start(data){
       if (d && typeof d === "object") S.drafts[c.id] = { lines: cleanLines(d.lines, c.stars.length), name: str(d.name, NAME_MAX), story: typeof d.story === "string" ? d.story.slice(0, STORY_MAX) : "", touched: !!d.touched };
     }
   }
-  const cid = data.cid || load("rs-cid"); if (typeof cid === "string" && Object.hasOwn(BYID, cid)) S.cid = cid;
+  /* a fresh visit starts on today's constellation, so everyone meets on the same sky */
+  const tp = topicOf(today()), cid = data.cid || tp.cid; if (typeof cid === "string" && Object.hasOwn(BYID, cid)) S.cid = cid;
   if (data.ghost) S.ghost = true;
   S.spin = load("rs-spin") !== false; renderSpin();
 
-  bindControls(); bindSkyInput(); bindIntro();
+  bindControls(); bindSkyInput(); bindIntro({ theme: tp.theme, place: `${BYID[tp.cid].ko}자리` });
   startClock();
   renderTop(); renderBottom();
   S.cam = fit(S.cid); draw();

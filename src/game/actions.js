@@ -6,7 +6,7 @@ import { ORDER } from "../data/constellations.js";
 import { writeMine, writeError } from "./store.js";
 import { flyTo, requestDraw } from "../sky/motion.js";
 import { renderTop, renderBottom } from "../ui/panels.js";
-import { toast, store } from "../ui/dom.js";
+import { toast } from "../ui/dom.js";
 
 /* join stars a and b, or remove the line if they are already joined */
 export function toggleLine(a, b){
@@ -33,7 +33,7 @@ export function clearLines(){
 }
 
 export function selectConst(cid, view = null){
-  S.cid = cid; S.selected = null; S.down = null; S.viewing = view; store("rs-cid", cid);
+  S.cid = cid; S.selected = null; S.down = null; S.viewing = view;
   S.noRefit = true; renderTop(); renderBottom(); S.noRefit = false;
   requestAnimationFrame(() => flyTo(cid));
 }

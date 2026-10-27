@@ -11,10 +11,10 @@ export function rawXY(o, ra0, sd0, cd0, floor = -0.95){
   return [k * o.cd * Math.sin(da), k * (cd0 * o.sd - sd0 * o.cd * cda), cosc];
 }
 
-/* the band of screen between the title and the bottom controls, where a constellation is framed */
+/* the band of screen between the title (with today's topic) and the bottom controls, where a constellation is framed */
 function region(){
   const h = sky.clientHeight;
-  const top = Math.min($("#titleUI").getBoundingClientRect().bottom + 8, h * .4);
+  const top = Math.min($("#topUI").getBoundingClientRect().bottom + 8, h * .4);
   const pane = S.viewing ? $("#vcard") : $("#drawUI");
   const bot = Math.max(pane.getBoundingClientRect().top - 8, h * .5);
   return { top, bot };
