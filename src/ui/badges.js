@@ -25,6 +25,7 @@ export function renderBadgeSheet(){
   const s = myStats(), got = s.badges;
   $("#sheetTitle").textContent = `내 뱃지 ${Object.keys(got).length} / ${BADGES.length}`;
   const note = $("#badgeNotice"), why = canAct() ? "" : whyNot(); note.hidden = !why; note.textContent = why;
+  renderAccount();
 
   const tiles = $("#myStats"); tiles.textContent = "";
   for (const [label, value, sub] of [
@@ -47,6 +48,20 @@ export function renderBadgeSheet(){
     li.setAttribute("aria-label", on ? `${b.name}, ${shortDay(got[b.id])}에 얻음` : b.secret ? "숨은 뱃지, 아직 못 얻음" : `${b.name}, 아직 못 얻음: ${b.how}`);
     ul.append(li);
   }
+}
+
+/* the account box, where the backend has accounts (Firebase): anonymous or a linked Google account */
+function renderAccount(){
+  const box = $("#accountBox"), be = S.backend, acc = be && be.account ? be.account() : null;
+  box.hidden = !acc; if (!acc) return;
+  const t = $("#accountText"); t.textContent = "";
+  if (acc.kind === "google"){
+    t.append(el("b", null, acc.name || "구글 계정"), el("span", null, acc.email ? `${acc.email} · 어느 기기에서 들어와도 이 기록이 이어져요` : "어느 기기에서 들어와도 이 기록이 이어져요"));
+  } else {
+    t.append(el("b", null, "익명으로 플레이 중"), el("span", null, "기록이 이 브라우저에만 있어요. 구글로 로그인하면 다른 기기에서도 이어져요."));
+  }
+  $("#googleBtn").hidden = acc.kind === "google";
+  $("#signOutBtn").hidden = acc.kind !== "google";
 }
 
 /* pop up badges that appeared since the last look; the first look only takes note of what is already there */

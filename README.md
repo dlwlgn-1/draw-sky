@@ -32,12 +32,13 @@ GitHub에 올리면 `.github/workflows/ci.yml`이 테스트와 빌드를 자동�
 
 ### 공개 웹사이트: Firebase
 
-같은 코드를 Firebase(익명 로그인 + Firestore + Hosting)로 돌리면 누구나 링크로 들어와 플레이할 수 있습니다.
+같은 코드를 Firebase(익명·구글 로그인 + Firestore + Hosting)로 돌리면 누구나 링크로 들어와 플레이할 수 있습니다.
 `vite.config.js`가 `.env.local`에 Firebase 설정이 있으면 `src/backend/firebase.js`를, 없으면 `src/backend/claude.js`를 씁니다.
 
 **1. Firebase 프로젝트 만들기** (https://console.firebase.google.com, 처음 한 번)
 1. 프로젝트 추가 → 이름 입력(예: `draw-sky`) → Google 애널리틱스는 꺼도 됩니다.
-2. 빌드 → **Authentication** → 시작하기 → 로그인 방법 → **익명** 사용 설정.
+2. 빌드 → **Authentication** → 시작하기 → 로그인 방법 → **익명** 사용 설정, 이어서 새 제공업체 추가 → **Google** 사용 설정(프로젝트 지원 이메일 선택).
+   배포 뒤 다른 주소(예: 직접 산 도메인)에서도 열 거라면 Authentication → 설정 → **승인된 도메인**에 그 주소를 추가합니다(`localhost`, `<프로젝트ID>.web.app`은 기본으로 들어 있습니다).
 3. 빌드 → **Firestore Database** → 데이터베이스 만들기 → 위치 `asia-northeast3 (서울)` → 프로덕션 모드.
 4. 프로젝트 설정(톱니바퀴) → 내 앱 → 웹(`</>`) 앱 추가 → 나오는 `firebaseConfig` 값을 둡니다.
 
@@ -65,7 +66,11 @@ firebase deploy
 `firebase use --add`에서 만든 프로젝트를 고르면 `.firebaserc`가 생깁니다. `firebase deploy`가 사이트(`dist-web/`)와 보안 규칙(`firestore.rules`: 모두 읽기, 각자 자기 문서만 쓰기)을 함께 올리고, 주소 `https://<프로젝트ID>.web.app`을 알려 줍니다. 고친 뒤에는 `npm run build:web`과 `firebase deploy`만 다시 하면 됩니다.
 
 **알아 둘 점**
-- 익명 로그인이라 브라우저마다 다른 사람이 됩니다. 기록을 지우거나 다른 기기에서 들어오면 새 사람으로 시작합니다(나중에 구글 로그인을 붙일 수 있습니다).
+- 처음엔 익명 로그인이라 브라우저마다 다른 사람이 됩니다. **내 뱃지 → 구글로 로그인**을 누르면:
+  - 지금 익명 기록에 구글 계정이 연결되어 같은 기록이 그대로 이어지고, 다른 기기에서 같은 구글로 로그인하면 그 기록으로 들어옵니다.
+  - 그 구글 계정에 이미 기록이 있으면(다른 기기에서 먼저 연결한 경우) 그 기록으로 바꾸고 페이지를 새로 엽니다. 이 브라우저의 익명 기록은 남지 않습니다.
+  - 팝업이 막힌 브라우저에서는 구글 페이지로 이동했다가 돌아옵니다.
+  - 로그아웃하면 새 익명 기록으로 시작합니다. 구글 로그인은 Firebase 사이트에서만 보이고, claude.ai 아티팩트는 claude.ai 계정을 그대로 씁니다.
 - Firestore의 줄 데이터는 배열 속 배열을 저장할 수 없어 `[a, b, a, b, …]`로 펴서 저장하고 읽을 때 되돌립니다(`backend/firebase.js`).
 - 무료 요금제(Spark)는 하루 읽기 5만 번 같은 한도가 있습니다. "지금 있는 사람"은 이를 아끼려고 2분마다만 갱신합니다.
 - claude.ai 아티팩트의 작품·기록과 Firebase의 작품·기록은 서로 다른 저장소입니다.
@@ -80,7 +85,7 @@ public/sky.json         실제 별·은하수 데이터 (빌드 때 그대로 �
 src/
   backend/
     claude.js           claude.ai 아티팩트 기능(공유 데이터베이스, 이름, 파일 저장, 실시간 접속)
-    firebase.js         같은 모양의 Firebase 버전(익명 로그인, Firestore, 닉네임)
+    firebase.js         같은 모양의 Firebase 버전(익명·구글 로그인, Firestore, 닉네임)
   main.js               시작점: 모듈을 연결하고 페이지를 엽니다
   styles.css            디자인
   data/

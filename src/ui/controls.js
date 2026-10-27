@@ -2,7 +2,7 @@
 import { S, draft, canAct, whyNot } from "../game/state.js";
 import { NAME_MAX, STORY_MAX, NICK_MAX } from "../game/rules.js";
 import { writeError } from "../game/store.js";
-import { selectConst, stepConst, undoLine, clearLines, closeEntry, stepEntry, vote, postEntry, removeEntry, saveEntryImage } from "../game/actions.js";
+import { selectConst, stepConst, undoLine, clearLines, closeEntry, stepEntry, vote, postEntry, removeEntry, saveEntryImage, signInGoogle, signOutAccount } from "../game/actions.js";
 import { requestDraw } from "../sky/motion.js";
 import { renderBottom, renderSheet, openSheet, closeSheet, renderSpin, updateLens } from "./panels.js";
 import { $, toast, store } from "./dom.js";
@@ -63,6 +63,17 @@ export function bindControls(){
     }
     b.dataset.confirm = ""; b.textContent = "내 작품 내리기";
     removeEntry();
+  });
+
+  $("#googleBtn").addEventListener("click", signInGoogle);
+  $("#signOutBtn").addEventListener("click", () => {
+    const b = $("#signOutBtn");
+    if (b.dataset.confirm !== "1"){
+      b.dataset.confirm = "1"; b.textContent = "한 번 더 누르면 로그아웃해요";
+      setTimeout(() => { b.dataset.confirm = ""; b.textContent = "로그아웃"; }, 4000);
+      return;
+    }
+    signOutAccount();
   });
 
   $("#sheetClose").addEventListener("click", closeSheet);

@@ -1,10 +1,14 @@
 /* Firebase backend: the same shape as backend/claude.js, for running the game as an ordinary website.
-   Players sign in anonymously (one id per browser), documents live in Firestore under players/<uid>,
+   Players start signed in anonymously (one id per browser) and can link a Google account, which keeps the
+   same id and record and lets them carry on from other devices. Documents live in Firestore under players/<uid>,
    and "who is here now" is a presence/<uid> document refreshed every 2 minutes (slow on purpose: every refresh
    is read by everyone watching, and Firestore's free plan counts reads).
    Configure with VITE_FIREBASE_* in .env.local (see .env.example). */
 import { initializeApp } from "firebase/app";
-import { getAuth, signInAnonymously, onAuthStateChanged, connectAuthEmulator } from "firebase/auth";
+import {
+  getAuth, signInAnonymously, onAuthStateChanged, connectAuthEmulator, signOut,
+  GoogleAuthProvider, linkWithPopup, linkWithRedirect, getRedirectResult, signInWithCredential
+} from "firebase/auth";
 import { getFirestore, collection, doc, onSnapshot, setDoc, deleteDoc, serverTimestamp, query, limit, connectFirestoreEmulator } from "firebase/firestore";
 
 const env = import.meta.env;
@@ -41,9 +45,17 @@ export async function openBackend(){
     connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
     connectFirestoreEmulator(db, "127.0.0.1", 8080);
   }
+  const google = new GoogleAuthProvider(); google.setCustomParameters({ prompt: "select_account" });
+  /* back from a Google redirect (phones that block pop-ups): if that Google account already had a record, switch to it */
+  await getRedirectResult(auth).catch(err => {
+    const cred = GoogleAuthProvider.credentialFromError(err);
+    return cred ? signInWithCredential(auth, cred) : null;
+  });
   const user = await new Promise((resolve, reject) => {
-    const stop = onAuthStateChanged(auth, u => { if (u){ stop(); resolve(u); } });
-    signInAnonymously(auth).catch(err => { stop(); reject(err); });
+    const stop = onAuthStateChanged(auth, u => {
+      if (u){ stop(); resolve(u); }
+      else signInAnonymously(auth).catch(err => { stop(); reject(err); });
+    });
   });
   const uid = user.uid;
 
@@ -64,6 +76,23 @@ export async function openBackend(){
     },
     savePlayer: (id, data) => setDoc(doc(db, "players", id), mapLines(data, flatLines)).catch(translate),
     names: async () => ({}),
+    /* who I am signed in as: { kind: "anonymous" } or { kind: "google", name, email } */
+    account(){
+      const g = auth.currentUser && auth.currentUser.providerData.find(p => p.providerId === "google.com");
+      return g ? { kind: "google", name: g.displayName || "", email: g.email || "" } : { kind: "anonymous" };
+    },
+    /* link Google to this record (same id), or, if that Google account already has a record, switch to it.
+       Resolves { switched } (the page should reload to load the other record) or { redirect } (the browser is leaving). */
+    async signInGoogle(){
+      try { await linkWithPopup(auth.currentUser, google); return { switched: false }; }
+      catch (err){
+        if (err.code === "auth/credential-already-in-use"){ await signInWithCredential(auth, GoogleAuthProvider.credentialFromError(err)); return { switched: true }; }
+        if (err.code === "auth/popup-blocked" || err.code === "auth/operation-not-supported-in-this-environment"){ await linkWithRedirect(auth.currentUser, google); return { redirect: true }; }
+        throw err;
+      }
+    },
+    /* sign out; the next visit starts a fresh anonymous record */
+    async signOut(){ await deleteDoc(mine).catch(() => {}); await signOut(auth); return { switched: true }; },
     async saveFile(filename, blob){
       const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = filename;
       document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);

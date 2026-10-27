@@ -104,6 +104,20 @@ export async function saveEntryImage(){
   } finally { S.saving = false; renderBottom(); }
 }
 
+/* link a Google account (Firebase only). Switching to another account's record reloads the page. */
+export async function signInGoogle(){
+  try {
+    const r = await S.backend.signInGoogle();
+    if (r.switched) location.reload();
+    else if (!r.redirect){ toast("구글 계정과 연결했어요. 이제 다른 기기에서도 기록이 이어져요"); renderTop(); renderBottom(); }
+  } catch (err){
+    if (!/popup-closed|cancelled-popup/.test(err && err.code || "")) toast("구글 로그인을 하지 못했어요. 잠시 후 다시 해 주세요.", true);
+  }
+}
+export async function signOutAccount(){
+  try { await S.backend.signOut(); } finally { location.reload(); }
+}
+
 export async function removeEntry(){
   const k = S.viewing.day + "_" + S.cid;
   try { await writeMine(m => { delete m.entries[k]; }); closeEntry(); toast("작품을 내렸어요. 그린 선은 그대로 남아 있어요."); }

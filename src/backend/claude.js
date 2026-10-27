@@ -11,6 +11,7 @@
      names(ids)                  { id: display name or "" }
      saveFile(filename, blob)    offer a file to the player, or null when this view cannot
      needsNick                   true when the backend has no names, so players choose a nickname
+     account(), signInGoogle(), signOut()   accounts, where the backend has them (Firebase); absent here
      setPresence(state)          share a small object about me with everyone here now (no-op without a room)
      watchPeers(onPeers)         onPeers([{ kind, isMe, by, peer, presence }, …]) when the room changes, or null */
 export async function openBackend(){

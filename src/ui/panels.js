@@ -117,7 +117,7 @@ export async function renderSheet(){
     $("#nameInput").placeholder = here ? `예: ${tp.example.split(",")[0]}` : "이름을 지어 주세요";
     const askNick = !!(S.backend && S.backend.needsNick), nk = $("#nickInput");
     $("#nickField").hidden = !askNick;
-    if (askNick && !nk.value) nk.value = (S.mine && S.mine.nick) || "";
+    if (askNick && !nk.value){ const acc = S.backend.account ? S.backend.account() : null; nk.value = (S.mine && S.mine.nick) || (acc && acc.name) || ""; }
     const info = $("#formInfo"); info.textContent = "";
     if (dr.lines.length < 2) info.append(el("b", null, "선을 두 개 이상 이어야 올릴 수 있어요."), document.createTextNode(" 시트를 닫고 하늘에서 별을 이어 주세요."));
     else info.append(el("b", null, `선 ${dr.lines.length}개 · 별 ${new Set(dr.lines.flat()).size}개`), document.createTextNode(mine ? " · 오늘 올린 작품을 이 그림으로 바꿔요" : " · 오늘 자정까지 순위에 올라가요"));
