@@ -18,8 +18,9 @@ const labelAt = p => S.labels.find(l => p.x >= l.x0 && p.x <= l.x1 && p.y >= l.y
 
 export function bindSkyInput(){
   let gest = null;
+  /* one finger at a time: a second finger is ignored until the first lifts */
   sky.addEventListener("pointerdown", ev => {
-    if (isMoving()) return;
+    if (isMoving() || gest) return;
     const p = pt(ev), star = S.viewing ? null : hit(p, ev.pointerType !== "mouse");
     S.down = star;
     gest = { id: ev.pointerId, x0: p.x, y0: p.y, t0: performance.now(), star, swiping: false, base: { ...S.cam } };
@@ -31,11 +32,13 @@ export function bindSkyInput(){
     if (!gest.swiping && Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) * 1.3) gest.swiping = true;
     if (gest.swiping){ S.cam = { ...gest.base, ox: gest.base.ox + dx / gest.base.s * .9 }; requestDraw(true); }
   });
-  sky.addEventListener("pointercancel", () => {
-    if (gest && gest.swiping) flyTo(S.cid, true);
+  sky.addEventListener("pointercancel", ev => {
+    if (!gest || ev.pointerId !== gest.id) return;
+    if (gest.swiping) flyTo(S.cid, true);
     gest = null; S.down = null;
   });
   sky.addEventListener("pointerup", ev => {
+    if (!gest || ev.pointerId !== gest.id) return;
     const g = gest; gest = null;
     const start = S.down; S.down = null;
     if (isMoving()) return;

@@ -118,6 +118,11 @@ artifact.capabilities.json  아티팩트에 선언하는 기능 목록
 
 - 접근 규칙: `players`는 모두 읽기, `players/{self}`는 참여자(Contributor) 이상이 자기 문서만 쓰기
 
+## 알려진 한계
+
+- 모든 사람의 문서를 한 번에 최대 1,000개까지 받아 순위를 계산합니다. 참여자가 그보다 많아지면 순위가 사람마다 달라질 수 있어, 날짜별로 필요한 문서만 받는 구조로 바꿔야 합니다. (내 문서는 따로 받아서, 내 기록이 덮어써지는 일은 없습니다.)
+- 뱃지는 각자 자기 문서에 쓰는 개인 기록이라, 조작을 막는 공식 기록으로 쓰기에는 맞지 않습니다.
+
 ## 데이터 출처
 
 - 별: XHIP — An Extended Hipparcos Compilation (Anderson & Francis 2012, VizieR V/137D)

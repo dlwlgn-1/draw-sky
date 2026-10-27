@@ -2,7 +2,9 @@
 
    Entries and votes are pruned after a week, so progress lives in a separate record that is never pruned:
      stats: { posts, topicPosts, stories, given, drawn: { cid: n }, streak, best, lastDay,
-              maxStars, wins: { "<day>_<cid>": 1 }, marks: { big, classic, owl }, badges: { id: "<day earned>" } }
+              maxStars, wins: { "<day>_<cid>": 1 }, marks: { big, classic, owl }, badges: { id: "<day earned>" },
+              seen: { day, posted: { cid: 1 }, voted: { cid: 1 } } }   ← what today already counted, so removing and
+                                                                           redoing a post or a vote never counts twice
    Each player writes only their own record, so badges are a personal log rather than a contest result. */
 
 export const BADGES = [
@@ -27,7 +29,8 @@ const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 const WIN_RE = /^\d{4}-\d{2}-\d{2}_[a-z]+$/;
 const count = v => Number.isInteger(v) && v > 0 ? Math.min(v, 1e6) : 0;
 
-export const emptyStats = () => ({ posts: 0, topicPosts: 0, stories: 0, given: 0, drawn: {}, streak: 0, best: 0, lastDay: "", maxStars: 0, wins: {}, marks: {}, badges: {} });
+const emptySeen = (day = "") => ({ day, posted: {}, voted: {} });
+export const emptyStats = () => ({ posts: 0, topicPosts: 0, stories: 0, given: 0, drawn: {}, streak: 0, best: 0, lastDay: "", maxStars: 0, wins: {}, marks: {}, badges: {}, seen: emptySeen() });
 
 /* stats read from the store are the player's own input: keep only known fields of the right shape */
 export function cleanStats(v, cids){
@@ -38,15 +41,25 @@ export function cleanStats(v, cids){
   if (v.wins && typeof v.wins === "object") for (const k of Object.keys(v.wins).slice(0, 2000)) if (WIN_RE.test(k)) s.wins[k] = 1;
   if (v.marks && typeof v.marks === "object") for (const k of ["big", "classic", "owl"]) if (v.marks[k]) s.marks[k] = 1;
   if (v.badges && typeof v.badges === "object") for (const k of Object.keys(v.badges)) if (IDS.has(k) && typeof v.badges[k] === "string" && DAY_RE.test(v.badges[k])) s.badges[k] = v.badges[k];
+  const sn = v.seen;
+  if (sn && typeof sn === "object" && typeof sn.day === "string" && DAY_RE.test(sn.day)){
+    s.seen.day = sn.day;
+    for (const part of ["posted", "voted"]) if (sn[part] && typeof sn[part] === "object") for (const c of Object.keys(sn[part])) if (cids.has(c)) s.seen[part][c] = 1;
+  }
   return s;
 }
 
 const prevDay = day => { const t = Date.UTC(+day.slice(0, 4), +day.slice(5, 7) - 1, +day.slice(8, 10)) - 864e5; return new Date(t).toISOString().slice(0, 10); };
 const sameLines = (a, b) => a.length === b.length && a.every(([p, q]) => b.some(([r, t]) => (p === r && q === t) || (p === t && q === r)));
 
-/* a post: p = { day, cid, isNew, story, lines, orig, topicCid, hour } where hour is the KST hour */
+const seenOn = (s, day) => s.seen.day === day ? s.seen : (s.seen = emptySeen(day));
+
+/* a post or a re-post: p = { day, cid, story, lines, orig, topicCid, hour } where hour is the KST hour.
+   Counters move only for the first post of a constellation on a day. */
 export function recordPost(s, p){
-  if (p.isNew){
+  const seen = seenOn(s, p.day);
+  if (!seen.posted[p.cid]){
+    seen.posted[p.cid] = 1;
     s.posts++;
     s.drawn[p.cid] = (s.drawn[p.cid] || 0) + 1;
     if (p.story) s.stories++;
@@ -61,8 +74,12 @@ export function recordPost(s, p){
   if (p.hour < 4) s.marks.owl = 1;
 }
 
-/* a vote: only a vote given where there was none counts (moving or taking it back does not) */
-export function recordVote(s, hadVote, nowVoted){ if (!hadVote && nowVoted) s.given++; }
+/* a vote: counts once per constellation per day, however often it is moved or taken back and given again */
+export function recordVote(s, day, cid, nowVoted){
+  if (!nowVoted) return;
+  const seen = seenOn(s, day);
+  if (!seen.voted[cid]){ seen.voted[cid] = 1; s.given++; }
+}
 
 /* what the rankings say about my entries: most stars on one entry, and days I finished first.
    rankOf(day, cid) returns that day's ranking; a day counts as won only once it has closed. */

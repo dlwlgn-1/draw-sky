@@ -9,6 +9,7 @@ export const S = {
   sheet: null,           // "form" | "rank" | "pick" | "badges"
   ghost: false,          // show the traditional figure
   selected: null, down: null, noRefit: false,
+  posting: false, saving: false,   // a post or an image save is under way
   spin: true,            // move the sky between constellations (off: switch at once)
   drafts: {}, history: {},
   players: new Map(), mine: null, loaded: false, dbChecked: false,

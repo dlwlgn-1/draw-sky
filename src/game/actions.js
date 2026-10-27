@@ -1,5 +1,5 @@
 /* What a player can do: draw lines, move between constellations, look at entries, vote, post, remove. */
-import { S, draft, rank, myVote, canAct, whyNot } from "./state.js";
+import { S, draft, rank, canAct, whyNot } from "./state.js";
 import { MAX_LINES, toggleVote } from "./rules.js";
 import { recordPost, recordVote, stamp } from "./badges.js";
 import { topicOf } from "./topic.js";
@@ -54,17 +54,20 @@ export function stepEntry(dir){
   if (n) showEntry(S.viewing.day, n.author);
 }
 
-export async function vote(author, cid){
+/* day: the day the button was drawn for, so a tap just after midnight does not land on the new day */
+export async function vote(author, cid, day){
   if (!canAct()){ toast(whyNot(), true); return; }
   if (author === S.myId) return;
-  const day = today(), had = myVote(day, cid);
+  if (day !== today()){ toast("날짜가 바뀌었어요. 오늘 작품에 다시 별을 주세요.", true); renderTop(); renderBottom(); return; }
   try {
-    await writeMine(m => {
-      const before = !!(m.votes[day] && m.votes[day][cid]);
+    const msg = await writeMine(m => {
+      const had = m.votes[day] && m.votes[day][cid];
       toggleVote(m, day, cid, author);
-      recordVote(m.stats, before, !!(m.votes[day] && m.votes[day][cid])); stamp(m.stats, day);
+      const now = m.votes[day] && m.votes[day][cid];
+      recordVote(m.stats, day, cid, !!now); stamp(m.stats, day);
+      return !now ? "별을 회수했어요" : had ? "별을 이 작품으로 옮겼어요" : "별을 줬어요";
     });
-    toast(had === author ? "별을 회수했어요" : had ? "별을 이 작품으로 옮겼어요" : "별을 줬어요");
+    toast(msg);
   } catch (err){ toast(writeError(err), true); }
 }
 
@@ -75,27 +78,28 @@ export async function postEntry(name, story){
   await writeMine(m => {
     const k = day + "_" + cid, prev = m.entries[k];
     m.entries[k] = { c: cid, d: day, name, story, lines, t: prev && prev.t || Date.now() };
-    recordPost(m.stats, { day, cid, isNew: !prev, story, lines, orig: BYID[cid].orig, topicCid: topicOf(day).cid, hour: kstHour() });
+    recordPost(m.stats, { day, cid, story, lines, orig: BYID[cid].orig, topicCid: topicOf(day).cid, hour: kstHour() });
     stamp(m.stats, day);
   });
   showEntry(day, S.myId);
   return again;
 }
 
-/* save the entry being viewed as a picture */
+/* save the entry being viewed as a picture; one save at a time */
 export async function saveEntryImage(){
   const v = S.viewing && rank(S.viewing.day, S.cid).find(e => e.author === S.viewing.author);
-  if (!v || !S.backend || !S.backend.saveFile) return;
-  const tp = topicOf(v.d), nm = await names([v.author]);
-  const author = v.author === S.myId ? "내 작품" : nm[v.author];
+  if (!v || !S.backend || !S.backend.saveFile || S.saving) return;
+  S.saving = true; renderBottom();
   try {
+    const tp = topicOf(v.d), nm = await names([v.author]);
+    const author = v.author === S.myId ? "내 작품" : nm[v.author];
     const blob = await entryCard(v, BYID[v.c], author, tp.cid === v.c ? tp.theme : "");
     const safe = v.name.replace(/[\\/:*?"<>|]/g, "").trim() || "별자리";
     await S.backend.saveFile(`${safe}.png`, blob);
     toast("이미지로 저장했어요");
   } catch (err){
     if (!err || err.code !== "declined") toast("이미지를 저장하지 못했어요.", true);
-  }
+  } finally { S.saving = false; renderBottom(); }
 }
 
 export async function removeEntry(){

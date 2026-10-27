@@ -6,19 +6,25 @@
      myId, canWrite              who is playing; canWrite null = unknown, let a refused write decide
      hasStore                    false when there is no shared database (then the game is draw-only)
      watchPlayers(onDocs, onErr) onDocs([[id, rawDoc], …]) on every change; returns an unsubscribe
+     watchPlayer(id, onDoc, onErr) onDoc(rawDoc or null) for one document, mine, so it is never missed
      savePlayer(id, doc)         replace my own document
      names(ids)                  { id: display name or "" }
      saveFile(filename, blob)    offer a file to the player, or null when this view cannot */
 export async function openClaudeBackend(){
   const c = window.claude;
   if (!c || typeof c.use !== "function") return null;
-  const [db, user, downloads] = await Promise.all([c.use("db"), c.use("user"), c.use("downloads")]);
+  /* each part may be missing in a given view; one missing part must not switch off the others */
+  const safe = f => Promise.resolve().then(f).catch(() => null);
+  const [db, user, downloads] = await Promise.all(["db", "user", "downloads"].map(n => safe(() => c.use(n))));
   return {
-    myId: user ? await user.id() : null,
-    canWrite: user ? await user.can("data.write") : null,
+    myId: user ? await safe(() => user.id()) : null,
+    canWrite: user ? await safe(() => user.can("data.write")) : null,
     hasStore: !!db,
     watchPlayers(onDocs, onErr){
       return db.collection("players").limit(1000).onSnapshot(snap => onDocs(snap.docs.filter(d => d.exists).map(d => [d.id, d.data()])), onErr);
+    },
+    watchPlayer(id, onDoc, onErr){
+      return db.doc("players/" + id).onSnapshot(snap => onDoc(snap.exists ? snap.data() : null), onErr);
     },
     savePlayer: (id, doc) => db.doc("players/" + id).set(doc),
     async names(ids){

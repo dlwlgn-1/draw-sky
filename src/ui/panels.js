@@ -56,7 +56,7 @@ export async function renderBottom(){
   const seq = ++vSeq, isToday = S.viewing.day === today(), list = rank(S.viewing.day, S.cid), i = list.findIndex(e => e.author === v.author);
   const nm = await names([v.author]); if (seq !== vSeq || !S.viewing) return;
   const rk = $("#vRank"); rk.textContent = `${v.rank}위`; rk.classList.toggle("plain", !(v.rank === 1 && v.votes > 0));
-  $("#vDay").textContent = isToday ? `오늘 ${list.length}작품 중` : `${shortDay(S.viewing.day)} 1위`;
+  $("#vDay").textContent = `${isToday ? "오늘" : shortDay(S.viewing.day)} ${list.length}작품 중`;
   $("#vName").textContent = v.name;
   const by = $("#vBy"); by.textContent = ""; by.append(el("b", null, nm[v.author]), document.createTextNode(` · 별 ${v.votes}개 · 선 ${v.lines.length}개`));
   const st = $("#vStory"); st.textContent = v.story || "이야기 없이 선만 남긴 작품이에요."; st.classList.toggle("none", !v.story);
@@ -64,7 +64,7 @@ export async function renderBottom(){
   $("#vPrev").disabled = i <= 0; $("#vNext").disabled = i < 0 || i >= list.length - 1;
   $("#vPrev").hidden = $("#vNext").hidden = list.length < 2;
   $("#vRemove").hidden = !(v.author === S.myId && isToday);
-  $("#vSave").hidden = !(S.backend && S.backend.saveFile);
+  $("#vSave").hidden = !(S.backend && S.backend.saveFile); $("#vSave").disabled = !!S.saving;
 }
 function fillStar(b, e, cid, isToday){
   const mine = e.author === S.myId, voted = isToday && myVote(today(), cid) === e.author;
@@ -74,13 +74,14 @@ function fillStar(b, e, cid, isToday){
   b.disabled = mine || !isToday || !canAct();
   b.setAttribute("aria-label", `${mine ? "내 작품" : voted ? "별 회수하기" : "별 주기"}, 별 ${e.votes}개`);
 }
-function voteChip(e, cid, isToday){
-  const b = el("button", "vote num"); b.type = "button";
+/* day: the day this list shows; the vote is refused if the day has turned since */
+function voteChip(e, cid, day){
+  const isToday = day === today(), b = el("button", "vote num"); b.type = "button";
   const mine = e.author === S.myId, voted = isToday && myVote(today(), cid) === e.author;
   b.innerHTML = voted ? STAR_SVG : STAR_O_SVG; b.append(document.createTextNode(String(e.votes)));
   b.setAttribute("aria-pressed", String(voted)); b.disabled = mine || !isToday || !canAct();
   b.setAttribute("aria-label", `${mine ? "내 작품" : voted ? "별 회수하기" : "별 주기"}, 별 ${e.votes}개`);
-  b.addEventListener("click", ev => { ev.stopPropagation(); vote(e.author, cid); });
+  b.addEventListener("click", ev => { ev.stopPropagation(); vote(e.author, cid, day); });
   return b;
 }
 function entryRow(e, nm, day){
@@ -89,7 +90,7 @@ function entryRow(e, nm, day){
   const cv = el("canvas"), meta = el("div", "meta"), by = el("span", "by");
   if (e.author === S.myId) by.append(el("span", "me-tag", "내 작품")); else by.textContent = nm[e.author];
   meta.append(el("span", "nm", e.name), by);
-  li.append(el("span", "rk num", String(e.rank)), cv, meta, voteChip(e, e.c, day === today()));
+  li.append(el("span", "rk num", String(e.rank)), cv, meta, voteChip(e, e.c, day));
   const open = () => { closeSheet(); showEntry(day, e.author); };
   li.addEventListener("click", open);
   li.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); open(); } });
@@ -113,8 +114,8 @@ export async function renderSheet(){
     const info = $("#formInfo"); info.textContent = "";
     if (dr.lines.length < 2) info.append(el("b", null, "선을 두 개 이상 이어야 올릴 수 있어요."), document.createTextNode(" 시트를 닫고 하늘에서 별을 이어 주세요."));
     else info.append(el("b", null, `선 ${dr.lines.length}개 · 별 ${new Set(dr.lines.flat()).size}개`), document.createTextNode(mine ? " · 오늘 올린 작품을 이 그림으로 바꿔요" : " · 오늘 자정까지 순위에 올라가요"));
-    $("#submitBtn").textContent = mine ? "고친 내용으로 다시 올리기" : "오늘 하늘에 올리기";
-    $("#submitBtn").disabled = !canAct();
+    $("#submitBtn").textContent = S.posting ? "올리는 중…" : mine ? "고친 내용으로 다시 올리기" : "오늘 하늘에 올리기";
+    $("#submitBtn").disabled = !canAct() || S.posting;
     requestAnimationFrame(() => drawThumb($("#formThumb"), c, { lines: dr.lines, ghost: !dr.lines.length, bare: true }));
     return;
   }

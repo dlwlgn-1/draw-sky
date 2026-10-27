@@ -33,21 +33,22 @@ export function bindControls(){
   $("#storyInput").addEventListener("input", e => { const d = draft(); d.story = e.target.value; d.touched = true; updateLens(); });
   $("#entryForm").addEventListener("submit", async ev => {
     ev.preventDefault();
+    if (S.posting) return;
     if (!canAct()){ toast(whyNot(), true); return; }
     const d = draft(), name = d.name.trim().slice(0, NAME_MAX), story = d.story.trim().slice(0, STORY_MAX);
     if (d.lines.length < 2){ toast("선을 두 개 이상 이어 주세요.", true); return; }
     if (!name){ toast("이름을 지어 주세요.", true); $("#nameInput").focus(); return; }
-    const btn = $("#submitBtn"); btn.disabled = true; btn.textContent = "올리는 중…";
+    S.posting = true; renderSheet();
     try {
       const again = await postEntry(name, story);
-      closeSheet();
+      S.posting = false; closeSheet();
       toast(again ? "고친 작품으로 바꿨어요" : "하늘에 올렸어요!");
-    } catch (err){ toast(writeError(err), true); renderSheet(); }
+    } catch (err){ S.posting = false; toast(writeError(err), true); renderSheet(); }
   });
 
   $("#vClose").addEventListener("click", closeEntry);
   $("#vSave").addEventListener("click", saveEntryImage);
-  $("#vVote").addEventListener("click", () => { if (S.viewing) vote(S.viewing.author, S.cid); });
+  $("#vVote").addEventListener("click", () => { if (S.viewing) vote(S.viewing.author, S.cid, S.viewing.day); });
   $("#vPrev").addEventListener("click", () => stepEntry(-1));
   $("#vNext").addEventListener("click", () => stepEntry(1));
   $("#vRemove").addEventListener("click", () => {

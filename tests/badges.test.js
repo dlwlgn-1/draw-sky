@@ -3,12 +3,12 @@ import assert from "node:assert/strict";
 import { BADGES, emptyStats, cleanStats, recordPost, recordVote, observe, stamp } from "../src/game/badges.js";
 import { cleanPlayer, ranking } from "../src/game/rules.js";
 
-const post = (s, day, cid, extra = {}) => recordPost(s, { day, cid, isNew: true, story: "", lines: [[0, 1]], orig: [[0, 2]], topicCid: "uma", hour: 12, ...extra });
+const post = (s, day, cid, extra = {}) => recordPost(s, { day, cid, story: "", lines: [[0, 1]], orig: [[0, 2]], topicCid: "uma", hour: 12, ...extra });
 
-test("posting counts posts, constellations, topic posts and stories; edits do not", () => {
+test("posting counts posts, constellations, topic posts and stories; edits and re-posts the same day do not", () => {
   const s = emptyStats();
   post(s, "2026-10-27", "uma", { story: "아침 해" });
-  post(s, "2026-10-27", "uma", { isNew: false, story: "고침" });
+  post(s, "2026-10-27", "uma", { story: "고침" });       // edited, or removed and posted again
   post(s, "2026-10-27", "ori");
   assert.equal(s.posts, 2); assert.equal(s.topicPosts, 1); assert.equal(s.stories, 1);
   assert.deepEqual(s.drawn, { uma: 1, ori: 1 });
@@ -33,10 +33,22 @@ test("special marks: big drawings, the traditional figure, small hours", () => {
   assert.equal(s.marks.big, 1);
 });
 
-test("only a newly given vote counts", () => {
+test("a vote counts once per constellation per day, however often it is moved or taken back", () => {
   const s = emptyStats();
-  recordVote(s, false, true); recordVote(s, true, true); recordVote(s, true, false);
-  assert.equal(s.given, 1);
+  for (let i = 0; i < 5; i++){ recordVote(s, "2026-10-27", "ori", true); recordVote(s, "2026-10-27", "ori", false); }
+  recordVote(s, "2026-10-27", "leo", true);
+  recordVote(s, "2026-10-28", "ori", true);
+  assert.equal(s.given, 3);
+});
+
+test("today's markers reset on a new day and survive cleaning", () => {
+  const s = emptyStats();
+  post(s, "2026-10-27", "ori"); post(s, "2026-10-28", "ori");
+  assert.equal(s.posts, 2);
+  const c = cleanStats(JSON.parse(JSON.stringify(s)), new Set(["ori"]));
+  assert.deepEqual(c.seen, { day: "2026-10-28", posted: { ori: 1 }, voted: {} });
+  post(c, "2026-10-28", "ori");
+  assert.equal(c.posts, 2);
 });
 
 test("stars received and finished days won come from the rankings", () => {

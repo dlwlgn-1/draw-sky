@@ -3,7 +3,7 @@
 import { S, rank, canAct } from "./state.js";
 import { observe, stamp } from "./badges.js";
 import { today } from "./time.js";
-import { writeMine } from "./store.js";
+import { writeMine, writeError } from "./store.js";
 
 let busy = false;
 
@@ -14,6 +14,6 @@ export function checkProgress(){
   if (!changed && !fresh.length) return;
   busy = true;
   writeMine(m => { observe(m.stats, S.myId, m.entries, rank, d); stamp(m.stats, d); })
-    .catch(() => {})
+    .catch(writeError)
     .finally(() => { busy = false; });
 }

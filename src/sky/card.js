@@ -61,5 +61,5 @@ export async function entryCard(entry, c, author, theme){
     x.fillStyle = COL.text; x.font = `36px ${NAME_FONT}`;
     wrap(x, entry.story, W - 2 * L, 2).forEach((t, i) => x.fillText(t, L, H - 150 + i * 54));
   }
-  return new Promise(res => cv.toBlob(res, "image/png"));
+  return new Promise((res, rej) => cv.toBlob(b => b ? res(b) : rej(new Error("toBlob")), "image/png"));
 }
