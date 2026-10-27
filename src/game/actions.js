@@ -1,8 +1,10 @@
 /* What a player can do: draw lines, move between constellations, look at entries, vote, post, remove. */
 import { S, draft, rank, myVote, canAct, whyNot } from "./state.js";
 import { MAX_LINES, toggleVote } from "./rules.js";
-import { today } from "./time.js";
-import { ORDER } from "../data/constellations.js";
+import { recordPost, recordVote, stamp } from "./badges.js";
+import { topicOf } from "./topic.js";
+import { today, kstHour } from "./time.js";
+import { ORDER, BYID } from "../data/constellations.js";
 import { writeMine, writeError } from "./store.js";
 import { flyTo, requestDraw } from "../sky/motion.js";
 import { renderTop, renderBottom } from "../ui/panels.js";
@@ -55,7 +57,11 @@ export async function vote(author, cid){
   if (author === S.myId) return;
   const day = today(), had = myVote(day, cid);
   try {
-    await writeMine(m => toggleVote(m, day, cid, author));
+    await writeMine(m => {
+      const before = !!(m.votes[day] && m.votes[day][cid]);
+      toggleVote(m, day, cid, author);
+      recordVote(m.stats, before, !!(m.votes[day] && m.votes[day][cid])); stamp(m.stats, day);
+    });
     toast(had === author ? "별을 회수했어요" : had ? "별을 이 작품으로 옮겼어요" : "별을 줬어요");
   } catch (err){ toast(writeError(err), true); }
 }
@@ -64,7 +70,12 @@ export async function vote(author, cid){
 export async function postEntry(name, story){
   const day = today(), cid = S.cid, lines = draft().lines.map(l => [...l]);
   const again = !!(S.mine && S.mine.entries[day + "_" + cid]);
-  await writeMine(m => { const k = day + "_" + cid, prev = m.entries[k]; m.entries[k] = { c: cid, d: day, name, story, lines, t: prev && prev.t || Date.now() }; });
+  await writeMine(m => {
+    const k = day + "_" + cid, prev = m.entries[k];
+    m.entries[k] = { c: cid, d: day, name, story, lines, t: prev && prev.t || Date.now() };
+    recordPost(m.stats, { day, cid, isNew: !prev, story, lines, orig: BYID[cid].orig, topicCid: topicOf(day).cid, hour: kstHour() });
+    stamp(m.stats, day);
+  });
   showEntry(day, S.myId);
   return again;
 }

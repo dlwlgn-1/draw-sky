@@ -17,6 +17,7 @@ export function bindControls(){
   $("#prevC").addEventListener("click", () => stepConst(-1));
   $("#nextC").addEventListener("click", () => stepConst(1));
   $("#cname").addEventListener("click", () => openSheet("pick"));
+  $("#badgeBtn").addEventListener("click", () => openSheet("badges"));
   $("#topicBtn").addEventListener("click", () => {
     const tp = topicOf(today());
     if (tp.cid !== S.cid) selectConst(tp.cid);

@@ -8,12 +8,15 @@ import { vote, selectConst, showEntry } from "../game/actions.js";
 import { flyTo, requestDraw } from "../sky/motion.js";
 import { drawThumb } from "../sky/thumb.js";
 import { $, el, fmtRA, fmtDec, STAR_SVG, STAR_O_SVG } from "./dom.js";
+import { renderBadgeSheet, announceBadges, earnedCount } from "./badges.js";
+import { BADGES } from "../game/badges.js";
 
 export function renderTop(){
   const c = cur(), n = rank(today(), S.cid).length;
   $("#cKo").textContent = `${c.ko}자리`;
   $("#cMeta").textContent = `${c.la} · ${!S.loaded && S.db ? "…" : n ? `오늘 ${n}작품` : "오늘 아직 없음"}`;
   $("#cname").setAttribute("aria-label", `${c.ko}자리, 별자리 목록 열기`);
+  $("#badgeCount").textContent = `${earnedCount()}/${BADGES.length}`;
   const tp = topicOf(today()), here = tp.cid === S.cid, btn = $("#topicBtn");
   $("#topicText").textContent = here ? tp.theme : `${BYID[tp.cid].ko}자리 · ${tp.theme}`;
   btn.classList.toggle("away", !here);
@@ -95,7 +98,8 @@ export async function renderSheet(){
   const sh = $("#sheet"), scrim = $("#scrim");
   sh.hidden = scrim.hidden = !S.sheet;
   if (!S.sheet) return;
-  $("#formBody").hidden = S.sheet !== "form"; $("#rankBody").hidden = S.sheet !== "rank"; $("#pickBody").hidden = S.sheet !== "pick";
+  for (const k of ["form", "rank", "pick", "badges"]) $(`#${k}Body`).hidden = S.sheet !== k;
+  if (S.sheet === "badges"){ renderBadgeSheet(); return; }
   const c = cur(), d = today(), seq = ++sSeq, tp = topicOf(d), here = tp.cid === S.cid;
   if (S.sheet === "form"){
     $("#sheetTitle").textContent = `${c.ko}자리에 새 이름 붙이기`;
@@ -159,7 +163,7 @@ function topicCard(box, tp, note){
   box.hidden = !tp; box.textContent = "";
   if (tp) box.append(el("b", null, `오늘의 주제 · ${tp.theme}`), document.createTextNode(note));
 }
-export function renderUI(){ renderTop(); renderBottom(); if (S.sheet) renderSheet(); requestDraw(); }
+export function renderUI(){ renderTop(); renderBottom(); if (S.sheet) renderSheet(); requestDraw(); announceBadges(); }
 
 export function openSheet(kind){
   S.sheet = kind;

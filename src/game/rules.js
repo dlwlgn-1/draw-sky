@@ -3,9 +3,11 @@
    Each player owns one document, players/<id>:
      entries: { "<day>_<constellation>": { c, d, name, story, lines: [[a, b], …], t } }
      votes:   { "<day>": { "<constellation>": "<author id>" } }
+     stats:   the lasting record behind badges (see badges.js); never pruned
    Everything read from the store is someone else's input, so it is cleaned before use. */
 import { BYID } from "../data/constellations.js";
 import { DAY, dayOf } from "./time.js";
+import { cleanStats } from "./badges.js";
 
 export const MAX_LINES = 80;
 export const NAME_MAX = 20;
@@ -13,6 +15,7 @@ export const STORY_MAX = 140;
 export const KEEP_DAYS = 7;
 
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
+const CIDS = new Set(Object.keys(BYID));
 
 export const str = (v, n) => typeof v === "string" ? v.trim().slice(0, n) : "";
 
@@ -29,7 +32,7 @@ export function cleanLines(v, n){
 }
 
 export function cleanPlayer(d){
-  const out = { entries: {}, votes: {} };
+  const out = { entries: {}, votes: {}, stats: cleanStats(d && d.stats, CIDS) };
   const E = d && typeof d.entries === "object" && d.entries || {};
   for (const k of Object.keys(E)){
     const e = E[k]; if (!e || typeof e !== "object") continue;
@@ -59,7 +62,7 @@ export function ranking(players, day, cid){
   return list;
 }
 
-/* drop entries and votes older than KEEP_DAYS, and empty vote days (mutates doc) */
+/* drop entries and votes older than KEEP_DAYS, and empty vote days (mutates doc); stats are kept */
 export function prune(doc, now = Date.now()){
   const cut = dayOf(now - KEEP_DAYS * DAY);
   for (const k of Object.keys(doc.entries)) if (doc.entries[k].d < cut) delete doc.entries[k];

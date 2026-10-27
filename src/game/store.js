@@ -1,6 +1,8 @@
 /* Talking to the artifact's shared database and identity services (window.claude). */
 import { S } from "./state.js";
 import { cleanPlayer, prune } from "./rules.js";
+import { emptyStats } from "./badges.js";
+import { checkProgress } from "./progress.js";
 import { renderUI } from "../ui/panels.js";
 import { toast } from "../ui/dom.js";
 
@@ -17,14 +19,14 @@ export async function connect(){
     for (const d of snap.docs) if (d.exists) m.set(d.id, cleanPlayer(d.data()));
     S.players = m; S.mine = S.myId ? m.get(S.myId) || S.mine || null : null;
     if (S.mine && S.myId) S.players.set(S.myId, S.mine);
-    S.loaded = true; renderUI();
+    S.loaded = true; renderUI(); checkProgress();
   }, () => { S.loaded = true; toast("작품 목록을 받아오지 못하고 있어요. 페이지를 새로 열어 주세요.", true); renderUI(); });
 }
 
 /* change my own document; writes run one at a time */
 export function writeMine(mutate){
   const run = async () => {
-    const base = JSON.parse(JSON.stringify(S.mine || { entries: {}, votes: {} }));
+    const base = JSON.parse(JSON.stringify(S.mine || { entries: {}, votes: {}, stats: emptyStats() }));
     mutate(base); prune(base);
     await S.db.doc("players/" + S.myId).set(base);
     S.mine = cleanPlayer(base); S.players.set(S.myId, S.mine); renderUI();

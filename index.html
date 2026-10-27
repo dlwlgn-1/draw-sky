@@ -27,7 +27,7 @@
 <header class="top">
   <div class="inner" id="topUI">
     <div class="bar">
-      <span class="logo">다시 그린 하늘</span>
+      <button type="button" class="mybadge" id="badgeBtn" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13.5" r="7.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m12 9.6 1.2 2.4 2.6.4-1.9 1.8.5 2.6-2.4-1.3-2.4 1.3.5-2.6-1.9-1.8 2.6-.4z" fill="currentColor"/><path d="M8.5 6.6 7 2.5h3.2L12 6M15.5 6.6 17 2.5h-3.2L12 6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>뱃지 <b class="num" id="badgeCount">0/15</b></button>
       <span class="right"><button type="button" class="spin" id="spinBtn" aria-pressed="true">이동 연출 켜짐</button><span class="clock num">마감까지 <b id="countdown">--:--:--</b></span></span>
     </div>
     <div class="title" id="titleUI">
@@ -101,6 +101,13 @@
       <div class="yday"><h3>어제 1위</h3><div id="yWinner"></div></div>
     </div>
 
+    <div id="badgesBody" hidden>
+      <p class="notice" id="badgeNotice" hidden></p>
+      <div class="mystats" id="myStats"></div>
+      <ul class="badges" id="badgeList"></ul>
+      <p class="credit">뱃지는 내 기록으로 계산해요. 작품과 투표는 7일 뒤 지워지지만 뱃지와 기록은 남아요.</p>
+    </div>
+
     <div id="pickBody" hidden>
       <p class="sub-note">고르면 하늘이 그 별자리로 움직여요.</p>
       <ul class="list" id="pickList"></ul>
@@ -110,6 +117,7 @@
 </section>
 
 <div class="toast" id="toast" role="status" hidden></div>
+<div class="award" id="award" role="status" hidden></div>
 <script type="module" src="/src/main.js"></script>
 </body>
 </html>
